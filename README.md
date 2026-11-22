@@ -2,7 +2,7 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 23 个，每个站点一个目录。早期插件界面文案中文写死；新加的四个带 `locales/`（`zh-CN.json` + `en.json`），宿主语言是 `en` 时显示英文。
+一共 28 个，每个站点一个目录。早期插件界面文案中文写死；新加的插件带 `locales/`（`zh-CN.json` + `en.json`），宿主语言是 `en` 时显示英文。
 
 ## 插件列表
 
@@ -16,6 +16,39 @@
 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | 1.0.0 | 目录能看，试听走网易云匹配 |
 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | 1.0.0 | 音单能，单曲是 DRM 加密 HLS |
 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | 1.0.0 | 能，有声小说章节直链 |
+
+## 全部插件（28 个）
+
+| 插件 | 目录 | 版本 |
+| --- | --- | --- |
+| [飞卢听书](plugins/faloo/) | `faloo` | 0.1.0 |
+| [275听书](plugins/i275/) | `i275` | 0.1.0 |
+| [单田芳评书网](plugins/pingshu5/) | `pingshu5` | 0.1.0 |
+| [听FM电台](plugins/tingfm/) | `tingfm` | 0.1.0 |
+| [悦听吧](plugins/yuetingba/) | `yuetingba` | 0.1.0 |
+| [闪闪音乐](plugins/33ve/) | `33ve` | 1.0.0 |
+| [世纪音乐](plugins/4c44-music/) | `4c44-music` | 1.1.0 |
+| [5nd音乐](plugins/5nd-music/) | `5nd-music` | 1.6.0 |
+| [5sing](plugins/5sing/) | `5sing` | 1.0.0 |
+| [布谷音乐](plugins/buguyy-music/) | `buguyy-music` | 1.0.0 |
+| [汽车音乐网](plugins/carsmp3-music/) | `carsmp3-music` | 1.0.0 |
+| [动感酷音乐](plugins/dgcol/) | `dgcol` | 1.0.0 |
+| [DJ024电音](plugins/dj024-music/) | `dj024-music` | 1.0.0 |
+| [凤梨音乐](plugins/flmp3-music/) | `flmp3-music` | 1.0.0 |
+| [GD音乐台](plugins/gdstudio/) | `gdstudio` | 1.0.0 |
+| [好听轻音乐](plugins/htqyy/) | `htqyy` | 1.0.0 |
+| [米乐迪音乐](plugins/imelody/) | `imelody` | 1.0.0 |
+| [一起听歌吧](plugins/jusic-room/) | `jusic-room` | 1.0.0 |
+| [米粒音乐](plugins/milimusic/) | `milimusic` | 1.0.0 |
+| [猫耳FM](plugins/missevan-music/) | `missevan-music` | 1.0.0 |
+| [无名音乐](plugins/mvmp3/) | `mvmp3` | 1.0.0 |
+| [九天音乐](plugins/nine-sky/) | `nine-sky` | 1.0.1 |
+| [恋听网](plugins/ting55/) | `ting55` | 1.0.0 |
+| [听书网](plugins/tingshuwang-music/) | `tingshuwang-music` | 1.0.0 |
+| [听听网](plugins/tingting/) | `tingting` | 1.0.1 |
+| [优折美音乐](plugins/uzz-music/) | `uzz-music` | 1.0.0 |
+| [小蜜蜂音乐](plugins/xmfwav/) | `xmfwav` | 1.0.1 |
+| [VY音乐](plugins/yyvy/) | `yyvy` | 1.0.0 |
 
 ## 新增插件（11 个）
 
@@ -162,3 +195,25 @@ dist/             打包好的 zip，按显示名命名
 - 插件只读取站点公开页面与接口，不含任何破解、绕付费或绕 DRM 的逻辑。
 - 音频版权归各站点与原作者，插件仅供个人学习与自用，不提供下载功能。
 - 站点改版会让解析失效，改版后对应插件需要跟着调。
+
+## 新增听书与电台（5 个）
+
+### 飞卢听书（faloo）
+
+GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直链；解析失败按书名回退蜻蜓 FM。
+
+### 275听书（i275）
+
+移动端书库，首页与搜索可用；播放页会被服务端 302 回首页，音频回退蜻蜓 FM。
+
+### 单田芳评书网（pingshu5）
+
+`/pbook/<slug>.html` 书页与栏目页，源音频是微信语音直链，易失效，默认回退蜻蜓 FM。
+
+### 听FM电台（tingfm）
+
+电台页 `tingfm.net/radio/<id>` 可解析 `playlist.m3u8` 直播流，另带蜻蜓兜底。
+
+### 悦听吧（yuetingba）
+
+分类 `/book/<id>/1`、详情 `/book/detail/<uuid>/<page>`，列表可用，播放回退蜻蜓 FM。

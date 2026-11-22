@@ -1,0 +1,29 @@
+{
+  "id": "i275",
+  "name": "275听书",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "m.i275.com",
+      "i275.com",
+      "*.i275.com",
+      "search.qtfm.cn",
+      "webapi.qtfm.cn",
+      "m.qtfm.cn",
+      "audio.qtfm.cn",
+      "pic.qtfm.cn"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ]
+}

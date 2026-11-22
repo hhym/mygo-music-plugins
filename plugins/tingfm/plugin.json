@@ -1,0 +1,29 @@
+{
+  "id": "tingfm",
+  "name": "听FM电台",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "cn.tingfm.com",
+      "tingfm.com",
+      "*.tingfm.com",
+      "search.qtfm.cn",
+      "webapi.qtfm.cn",
+      "m.qtfm.cn",
+      "audio.qtfm.cn",
+      "pic.qtfm.cn"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ]
+}
