@@ -1,0 +1,22 @@
+{
+  "id": "tingshuwang-music",
+  "name": "听书网",
+  "description": "听书网（www.tingshuwang.cc）的有声小说：玄幻武侠、都市言情、恐怖悬疑等分类，按书籍收听全本章节。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.tingshuwang.cc"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "最新上架", "page": "latest" },
+    { "title": "人气榜", "page": "rank" },
+    { "title": "玄幻武侠", "page": "category/xuanhuanwuxia" },
+    { "title": "都市言情", "page": "category/dushiyanqing" },
+    { "title": "军事历史", "page": "category/junshilishi" },
+    { "title": "完本", "page": "category/wanjie" },
+    { "builtin": "liked" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "carsmp3-music",
+  "name": "汽车音乐网",
+  "description": "汽车音乐网（www.carsmp3.com）的无损车载专辑目录，附网易云匹配试听。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.carsmp3.com", "api.i-meto.com", "api.injahow.cn"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "华语音乐", "page": "forum/40" },
+    { "title": "DJ摇滚", "page": "forum/43" },
+    { "title": "无损单曲", "page": "forum/49" },
+    { "title": "Hi-Res", "page": "forum/51" },
+    { "builtin": "liked" }
+  ]
+}

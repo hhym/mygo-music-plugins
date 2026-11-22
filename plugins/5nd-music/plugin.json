@@ -1,0 +1,85 @@
+{
+  "id": "5nd-music",
+  "name": "5nd音乐",
+  "description": "5nd音乐网的歌曲、榜单、歌手与专辑，带动态歌词。",
+  "version": "1.5.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.5nd.com",
+      "img.5nd.com",
+      "mpge.5nd.com"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": [
+        "img.5nd.com"
+      ],
+      "kinds": [
+        "image"
+      ],
+      "headers": {
+        "referer": "https://www.5nd.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "hosts": [
+        "mpge.5nd.com"
+      ],
+      "kinds": [
+        "audio"
+      ],
+      "headers": {
+        "referer": "https://www.5nd.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "settings": [
+    {
+      "key": "browser",
+      "label": "音频被拒时用浏览器打开",
+      "type": "select",
+      "options": [
+        {
+          "value": "",
+          "label": "只在 App 里播（默认）"
+        },
+        {
+          "value": "on",
+          "label": "用浏览器打开歌曲页"
+        }
+      ],
+      "help": "5nd 的音频域名会拒绝大多数客户端。打开后点击播放会用系统浏览器打开这首歌；整张专辑播放会一首开一个标签页。"
+    },
+    {
+      "key": "cookie",
+      "label": "Cookie（可选）",
+      "help": "只在音频域名拒绝 App 时使用：用浏览器打开 www.5nd.com，在开发者工具里复制 mpge.5nd.com 请求的整条 Cookie 粘贴到这里。"
+    }
+  ],
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "榜单",
+      "page": "charts"
+    },
+    {
+      "title": "歌手",
+      "page": "singers"
+    },
+    {
+      "title": "专辑",
+      "page": "albums"
+    },
+    {
+      "builtin": "liked"
+    }
+  ]
+}

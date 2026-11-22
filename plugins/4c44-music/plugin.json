@@ -1,0 +1,41 @@
+{
+  "id": "4c44-music",
+  "name": "世纪音乐",
+  "description": "世纪音乐（www.4c44.com）的歌曲、榜单、歌单与动态歌词。",
+  "version": "1.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.4c44.com"
+    ]
+  },
+  "settings": [
+    {
+      "key": "cookie",
+      "label": "Cookie (optional)",
+      "help": "Only if automatic verification fails: open www.4c44.com in a browser, pass the check, then copy the whole Cookie header from DevTools and paste it here."
+    }
+  ],
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "New songs",
+      "page": "chart/new"
+    },
+    {
+      "title": "Charts",
+      "page": "chart/top"
+    },
+    {
+      "title": "Playlists",
+      "page": "playlists"
+    },
+    {
+      "builtin": "liked"
+    }
+  ]
+}

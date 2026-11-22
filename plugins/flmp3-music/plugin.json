@@ -1,0 +1,18 @@
+{
+  "id": "flmp3-music",
+  "name": "凤梨音乐",
+  "description": "凤梨音乐网（flmp3.pro）的歌曲、音乐合集与在线试听，带歌词。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.flmp3.pro", "img.flmp3.pro", "*.kuwo.cn"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "全部歌曲", "page": "songs" },
+    { "title": "音乐合集", "page": "collections" },
+    { "builtin": "liked" }
+  ]
+}

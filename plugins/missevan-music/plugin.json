@@ -1,0 +1,20 @@
+{
+  "id": "missevan-music",
+  "name": "猫耳FM",
+  "description": "猫耳FM（missevan.com）的广播剧、音乐音单与声音搜索，音单里的曲目可试听。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.missevan.com", "*.maoercdn.com"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "推荐音单", "page": "sheets" },
+    { "title": "古风", "page": "tag/5" },
+    { "title": "广播剧", "page": "tag/4" },
+    { "title": "二次元", "page": "tag/159" },
+    { "builtin": "liked" }
+  ]
+}

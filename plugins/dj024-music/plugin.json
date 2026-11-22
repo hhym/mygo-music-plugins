@@ -1,0 +1,19 @@
+{
+  "id": "dj024-music",
+  "name": "DJ024电音",
+  "description": "沈阳DJ024电音传媒（www.dj024.com）的DJ舞曲、串烧与现场，带独家试听。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.dj024.com", "dns.dj024.vip"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "最新发布", "page": "latest" },
+    { "title": "独家舞曲", "page": "exclusive" },
+    { "title": "专辑", "page": "albums" },
+    { "builtin": "liked" }
+  ]
+}

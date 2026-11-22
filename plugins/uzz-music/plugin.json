@@ -1,0 +1,17 @@
+{
+  "id": "uzz-music",
+  "name": "优折美音乐",
+  "description": "优折美在线音乐播放器（m.uzz.me）的音源，网易云曲库的搜索、歌单与试听。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["m.uzz.me", "*.163.com", "*.126.net", "*.kuwo.cn", "*.qq.com"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "热门搜索", "page": "hot" },
+    { "builtin": "liked" }
+  ]
+}
