@@ -127,6 +127,13 @@ function blockStart(s, i) {
   return start;
 }
 
+function maxBookPage(html, catId) {
+  let max = 1;
+  const re = new RegExp(`/book/${catId}/([0-9]+)`, "g");
+  for (const m of String(html).matchAll(re)) max = Math.max(max, Number(m[1]) || 1);
+  return max;
+}
+
 function parseList(page) {
   const s = String(page || "");
   let re;
@@ -309,7 +316,7 @@ export async function home() {
       if (list.length) {
         remember(list);
         sections.push({ title: "最新更新", tracks: list.slice(0, 30), pageTitle: CFG.name });
-        if (CATS.length) sections.push({ title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) });
+        if (CATS.length) sections.push({ title: "分类与专辑库", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] });
         return { title: CFG.name, subtitle: CFG.subtitle || "", sections };
       }
     } catch (e) {}
@@ -323,23 +330,48 @@ export async function home() {
 export async function browse({ page }) {
   const raw = String(page || "");
   if (raw === "categories" || !raw) return { title: `${CFG.name}分类`, sections: [{ title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] };
+  const all = raw.match(/^all:(\d+)$/);
+  if (all) {
+    const pageNo = Math.max(1, Number(all[1]) || 1);
+    const list = []; const seen = new Set(); let maxPage = pageNo;
+    for (const c of CATS) {
+      try {
+        const page = await html(`/book/${encodeURIComponent(c.id)}/${pageNo}`);
+        maxPage = Math.max(maxPage, maxBookPage(page, encodeURIComponent(c.id)));
+        for (const t of parseList(page)) if (!seen.has(t.id)) { seen.add(t.id); list.push(t); }
+      } catch (e) {}
+    }
+    remember(list);
+    return {
+      title: "全部专辑",
+      subtitle: `第 ${pageNo} 页`,
+      sections: [{ title: `全部专辑 · 第 ${pageNo} 页`, tracks: list, morePage: pageNo < maxPage ? { page: `all:${pageNo + 1}`, pageTitle: "全部专辑" } : undefined, empty: list.length ? "" : "这一页没有内容" }],
+    };
+  }
   const m = raw.match(/^cat:([^:]+):(\d+)$/); if (!m) throw fail("unavailable", "没有这个页面");
   const cat = CATS.find((c) => String(c.id).toLowerCase() === decodeURIComponent(m[1]).toLowerCase());
   if (!cat) throw fail("unavailable", "没有这个分类");
-  let list = [];
-  try { list = parseList(await html((cat.path || CFG.catPath || "").replace("{id}", encodeURIComponent(cat.id)))); } catch (e) {}
-  if (list.length) { remember(list); return { title: cat.name, subtitle: CFG.name, sections: [{ title: cat.name, tracks: list }, { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] }; }
+  const pageNo = Math.max(1, Number(m[2]) || 1);
+  let list = []; let maxPage = pageNo;
+  try {
+    const page = await html((cat.path || `/book/${cat.id}/{page}`).replace("{id}", encodeURIComponent(cat.id)).replace("{page}", pageNo));
+    list = parseList(page); maxPage = maxBookPage(page, encodeURIComponent(cat.id));
+  } catch (e) {}
+  if (list.length) {
+    remember(list);
+    return { title: cat.name, subtitle: `第 ${pageNo} 页`, sections: [{ title: `${cat.name} · 第 ${pageNo} 页`, tracks: list, morePage: pageNo < maxPage ? { page: `cat:${encodeURIComponent(cat.id)}:${pageNo + 1}`, pageTitle: cat.name } : undefined }, { title: "分类", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] }] };
+  }
   const fb = await qtTracks(cat.query || cat.name, 16, true);
-  return { title: cat.name, subtitle: "源站暂时不可用，以下为蜻蜓FM兜底", sections: [{ title: cat.name, subtitle: "蜻蜓FM 兜底", tracks: fb }, { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] };
+  return { title: cat.name, subtitle: "源站暂时不可用，以下为蜻蜓FM兜底", sections: [{ title: cat.name, subtitle: "蜻蜓FM 兜底", tracks: fb }, { title: "分类", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] }] };
 }
 
 export async function search({ query, kind = "tracks", offset = 0 }) {
-  if (kind && kind !== "tracks" && kind !== "track") return { tracks: [], more: false };
+  if (kind && kind !== "tracks" && kind !== "track" && kind !== "albums") return { tracks: [], more: false };
   const term = String(query || "").trim(); if (!term) return { tracks: [], more: false };
   if (CFG.searchPath) {
     try {
       const list = parseList(await html(CFG.searchPath.replace("{q}", encodeURIComponent(term))));
-      if (list.length) { remember(list); return { tracks: list, more: false }; }
+      if (list.length) { remember(list); return { tracks: list, albums: list, more: false }; }
     } catch (e) {}
   }
   return { tracks: await qtTracks(term, 20), more: false };
