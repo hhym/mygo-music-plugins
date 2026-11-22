@@ -127,6 +127,15 @@ function blockStart(s, i) {
   return start;
 }
 
+function albumCards(list) {
+  return (list || []).map((t) => ({
+    id: albumIdOf((t.album && t.album.id) || t.id),
+    name: t.name,
+    imageUrl: (t.album && t.album.imageUrl) || "",
+    artists: t.artists || [],
+  })).filter((a) => a.id);
+}
+
 function maxBookPage(html, catId) {
   let max = 1;
   const re = new RegExp(`/book/${catId}/([0-9]+)`, "g");
@@ -315,7 +324,7 @@ export async function home() {
       const list = parseList(await html(CFG.homePath || "/"));
       if (list.length) {
         remember(list);
-        sections.push({ title: "最新更新", tracks: list.slice(0, 30), pageTitle: CFG.name });
+        sections.push({ title: "最新更新", tracks: list.slice(0, 30), albums: albumCards(list.slice(0, 30)), pageTitle: CFG.name });
         if (CATS.length) sections.push({ title: "分类与专辑库", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] });
         return { title: CFG.name, subtitle: CFG.subtitle || "", sections };
       }
@@ -345,7 +354,7 @@ export async function browse({ page }) {
     return {
       title: "全部专辑",
       subtitle: `第 ${pageNo} 页`,
-      sections: [{ title: `全部专辑 · 第 ${pageNo} 页`, tracks: list, morePage: pageNo < maxPage ? { page: `all:${pageNo + 1}`, pageTitle: "全部专辑" } : undefined, empty: list.length ? "" : "这一页没有内容" }],
+      sections: [{ title: `全部专辑 · 第 ${pageNo} 页`, tracks: list, albums: albumCards(list), morePage: pageNo < maxPage ? { page: `all:${pageNo + 1}`, pageTitle: "全部专辑" } : undefined, empty: list.length ? "" : "这一页没有内容" }],
     };
   }
   const m = raw.match(/^cat:([^:]+):(\d+)$/); if (!m) throw fail("unavailable", "没有这个页面");
@@ -359,7 +368,7 @@ export async function browse({ page }) {
   } catch (e) {}
   if (list.length) {
     remember(list);
-    return { title: cat.name, subtitle: `第 ${pageNo} 页`, sections: [{ title: `${cat.name} · 第 ${pageNo} 页`, tracks: list, morePage: pageNo < maxPage ? { page: `cat:${encodeURIComponent(cat.id)}:${pageNo + 1}`, pageTitle: cat.name } : undefined }, { title: "分类", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] }] };
+    return { title: cat.name, subtitle: `第 ${pageNo} 页`, sections: [{ title: `${cat.name} · 第 ${pageNo} 页`, tracks: list, albums: albumCards(list), morePage: pageNo < maxPage ? { page: `cat:${encodeURIComponent(cat.id)}:${pageNo + 1}`, pageTitle: cat.name } : undefined }, { title: "分类", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] }] };
   }
   const fb = await qtTracks(cat.query || cat.name, 16, true);
   return { title: cat.name, subtitle: "源站暂时不可用，以下为蜻蜓FM兜底", sections: [{ title: cat.name, subtitle: "蜻蜓FM 兜底", tracks: fb }, { title: "分类", links: [{ title: "全部专辑", page: "all:1" }, ...CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }))] }] };
@@ -371,14 +380,16 @@ export async function search({ query, kind = "tracks", offset = 0 }) {
   if (CFG.searchPath) {
     try {
       const list = parseList(await html(CFG.searchPath.replace("{q}", encodeURIComponent(term))));
-      if (list.length) { remember(list); return { tracks: list, albums: list, more: false }; }
+      if (list.length) { remember(list); return { tracks: list, albums: albumCards(list), more: false }; }
     } catch (e) {}
   }
   return { tracks: await qtTracks(term, 20), more: false };
 }
 
 export async function suggest({ query }) {
-  try { return (await qtTracks(String(query || ""), 6)).map((t) => t.name); } catch (e) { return []; }
+  const term = String(query || "").trim();
+  if (!term) return [];
+  try { return ((await search({ query: term, kind: "albums" })).albums || []).slice(0, 8).map((a) => a.name); } catch (e) { return []; }
 }
 
 export async function stream({ id }) {
@@ -401,6 +412,53 @@ export async function stream({ id }) {
 
   if (track && track.name) { const fb = await qtByName(track.name, 1); if (fb) return fb; }
   throw fail("unavailable", "这段音频暂时播不了：源站地址未解析到，蜻蜓FM也没有找到同名音频");
+}
+
+function albumIdOf(id) {
+  const s = String(id || "");
+  const m = s.match(/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/);
+  return m ? m[0] : "";
+}
+
+export async function album({ id } = {}) {
+  const bid = albumIdOf(id);
+  if (!bid) throw fail("unavailable", "没有这个专辑");
+  const first = await html(`/book/detail/${bid}/0`);
+  const name = clean((first.match(/<h1[^>]*class="[^"]*book-detail-title[^"]*"[^>]*>([\s\S]*?)<\/h1>/i) || first.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i) || [])[1]) || "未命名专辑";
+  const img = first.match(/<div class="books-detail-img">[\s\S]*?<img[^>]+src=["']([^"']+)["']/i);
+  const author = clean((first.match(/作\s*者：<\/span><span[^>]*>(?:<a[^>]*>)?([^<]+)</i) || [])[1]);
+  const speaker = clean((first.match(/演\s*播：<\/span>[\s\S]*?<a[^>]*>([^<]+)</i) || [])[1]);
+  const di = first.indexOf("内容简介");
+  const dseg = di >= 0 ? first.slice(di, di + 6000) : "";
+  const dm = dseg.match(/<div[^>]*class="[^"]*text-desc-content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+  const desc = clean(((dm || [])[1] || "").replace(/<br\s*\/>/gi, "\n").replace(/<[^>]+>/g, ""));
+
+  let maxOffset = 0;
+  for (const m of first.matchAll(new RegExp(`/book/detail/${bid}/([0-9]+)`, "g"))) maxOffset = Math.max(maxOffset, Number(m[1]) || 0);
+
+  const tracks = []; const seen = new Set();
+  for (let off = 0; off <= maxOffset; off += 200) {
+    const page = off === 0 ? first : await html(`/book/detail/${bid}/${off}`);
+    const re = /<div id="item_([0-9a-fA-F-]+)"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/g;
+    for (const m of page.matchAll(re)) {
+      const cid = m[1];
+      if (seen.has(cid)) continue; seen.add(cid);
+      const tm = m[2].match(/<a[^>]+(?:title="([^"]*)")?[^>]+href="\/book\/ting\/[0-9a-fA-F-]+"[^>]*>([^<]*)<\/a>/);
+      const cname = clean((tm && (tm[1] || tm[2])) || "");
+      tracks.push({
+        id: `/book/ting/${cid}`,
+        name: cname || `第 ${tracks.length + 1} 集`,
+        artists: [{ id: "", name: speaker }].filter((a) => a.name),
+        album: { id: bid, name, imageUrl: img ? absolute(img[1]) : "" },
+        duration: 0,
+      });
+    }
+  }
+
+  return {
+    album: { id: bid, name, imageUrl: img ? absolute(img[1]) : "", artists: [{ id: "", name: author }, { id: "", name: speaker }].filter((a) => a.name), description: desc },
+    tracks,
+  };
 }
 
 export function lyrics() { return {}; }
