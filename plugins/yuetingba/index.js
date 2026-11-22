@@ -1,10 +1,11 @@
 const CFG = {
   "name": "悦听吧",
   "base": "http://www.yuetingba.cn",
-  "mode": "book",
+  "mode": "yuetingba",
   "seed": "有声小说",
   "detail": "/book/detail/[0-9a-fA-F-]+/[0-9]+",
   "homePath": "/",
+  "searchPath": "/search?type=1&name={q}&pageIndex=1",
   "cats": [
     {
       "id": "1",
@@ -270,6 +271,22 @@ async function ting55Audio(url) {
   return { url: absolute(u), referer: absolute(url) };
 }
 
+async function yuetingbaAudio(url) {
+  let page = "";
+  let m = String(url).match(/\/book\/ting\/([0-9a-fA-F-]+)/);
+  if (!m) {
+    page = await html(url);
+    const c = page.match(/href="\/book\/ting\/([0-9a-fA-F-]+)"/);
+    if (!c) return null;
+    m = c;
+  }
+  const res = await fetch(`${BASE}/api/app/docs-listen/${m[1]}/audio-url`, { headers: { "user-agent": UA, referer: absolute(url) } });
+  if (!res.ok) return null;
+  const u = (await res.text()).trim();
+  if (!/^https?:/i.test(u)) return null;
+  return { url: u, referer: absolute(url) };
+}
+
 async function missevanAudio(url) {
   const m = String(url).match(/sound\/([0-9]+)|soundid=([0-9]+)/);
   if (!m) return null;
@@ -345,6 +362,7 @@ export async function stream({ id }) {
   try {
     if (CFG.mode === "ting55") r = await ting55Audio(url);
     else if (CFG.mode === "missevan") r = await missevanAudio(url);
+    else if (CFG.mode === "yuetingba") r = await yuetingbaAudio(url);
     else r = await detailAudio(url);
   } catch (e) { r = null; }
   if (r) return { url: r.url, type: streamType(r.url), headers: { referer: r.referer || REFERER, "user-agent": UA }, title: track ? track.name : "" };

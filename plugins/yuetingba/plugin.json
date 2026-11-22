@@ -1,7 +1,7 @@
 {
   "id": "yuetingba",
   "name": "悦听吧",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -14,7 +14,8 @@
       "webapi.qtfm.cn",
       "m.qtfm.cn",
       "audio.qtfm.cn",
-      "pic.qtfm.cn"
+      "pic.qtfm.cn",
+      "60.168.76.225"
     ]
   },
   "navigation": [

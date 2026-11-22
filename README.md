@@ -25,7 +25,7 @@
 | [275听书](plugins/i275/) | `i275` | 0.1.0 |
 | [单田芳评书网](plugins/pingshu5/) | `pingshu5` | 0.1.0 |
 | [听FM电台](plugins/tingfm/) | `tingfm` | 0.1.0 |
-| [悦听吧](plugins/yuetingba/) | `yuetingba` | 0.1.0 |
+| [悦听吧](plugins/yuetingba/) | `yuetingba` | 0.1.1 |
 | [闪闪音乐](plugins/33ve/) | `33ve` | 1.0.0 |
 | [世纪音乐](plugins/4c44-music/) | `4c44-music` | 1.1.0 |
 | [5nd音乐](plugins/5nd-music/) | `5nd-music` | 1.6.0 |
@@ -216,4 +216,4 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 ### 悦听吧（yuetingba）
 
-分类 `/book/<id>/1`、详情 `/book/detail/<uuid>/<page>`，列表可用，播放回退蜻蜓 FM。
+分类 `/book/<id>/1`、详情 `/book/detail/<uuid>/<page>`；搜索走站内 `/search?type=1&name=<q>&pageIndex=1`，播放从书页取首章 `/book/ting/<uuid>`，再调 `/api/app/docs-listen/<uuid>/audio-url` 拿 MP3 直链，失败才回退蜻蜓。
