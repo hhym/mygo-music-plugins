@@ -1,0 +1,28 @@
+{
+  "id": "dgcol",
+  "name": "动感酷音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.dgcol.com",
+      "dgcol.com",
+      "*.163music-playerapi.sbs"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": ["www.dgcol.com", "*.163music-playerapi.sbs"],
+      "kinds": ["image", "audio"],
+      "headers": { "referer": "https://www.dgcol.com/" }
+    }
+  ],
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "每日热歌", "page": "daily:1", "icon": "chart" },
+    { "title": "近期更新", "page": "newsong", "icon": "music" },
+    { "builtin": "liked", "title": "我的喜欢" }
+  ]
+}

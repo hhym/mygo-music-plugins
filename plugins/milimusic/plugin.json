@@ -1,0 +1,40 @@
+{
+  "id": "milimusic",
+  "name": "米粒音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.milimusic.cn",
+      "milimusic.cn",
+      "music.163.com",
+      "*.music.126.net"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": ["www.milimusic.cn"],
+      "kinds": ["image"],
+      "headers": {
+        "referer": "http://www.milimusic.cn/"
+      }
+    },
+    {
+      "hosts": ["music.163.com", "*.music.126.net"],
+      "kinds": ["audio"],
+      "headers": {
+        "referer": "https://music.163.com/"
+      }
+    }
+  ],
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "流行金曲", "page": "cat:liuxingjinqu", "icon": "music" },
+    { "title": "港台新歌", "page": "cat:gangtai", "icon": "music" },
+    { "title": "DJ歌曲", "page": "cat:dj", "icon": "music" },
+    { "title": "最新专辑", "page": "albums", "icon": "album" },
+    { "title": "歌手库", "page": "artists", "icon": "artist" }
+  ]
+}

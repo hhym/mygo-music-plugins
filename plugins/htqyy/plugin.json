@@ -1,0 +1,48 @@
+{
+  "id": "htqyy",
+  "name": "好听轻音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.htqyy.com",
+      "htqyy.com",
+      "s1.htqyy.com",
+      "*.htqyy.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "Charts",
+      "page": "charts",
+      "icon": "chart"
+    },
+    {
+      "title": "Categories",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "Liked Songs"
+    }
+  ],
+  "requestHeaders": [
+    {
+      "hosts": [
+        "i.htqyy.com"
+      ],
+      "kinds": [
+        "image"
+      ],
+      "headers": {
+        "referer": "http://www.htqyy.com/"
+      }
+    }
+  ]
+}

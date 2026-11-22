@@ -1,0 +1,50 @@
+{
+  "id": "mvmp3",
+  "name": "无名音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.mvmp3.com",
+      "mvmp3.com"
+    ]
+  },
+  "settings": [
+    {
+      "key": "cookie",
+      "label": "Session cookie (optional)",
+      "type": "password",
+      "help": "Only if the site's robot check keeps failing. Open www.mvmp3.com in a browser, pass the check, then copy the Cookie request header from the developer tools and paste it here."
+    }
+  ],
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "Charts",
+      "page": "charts",
+      "icon": "chart"
+    },
+    {
+      "title": "Playlists",
+      "page": "playlists",
+      "icon": "playlist"
+    },
+    {
+      "title": "Singers",
+      "page": "singers:1",
+      "icon": "artist"
+    },
+    {
+      "builtin": "liked",
+      "title": "Liked Songs"
+    },
+    {
+      "builtin": "savedAlbums",
+      "title": "Saved Albums"
+    }
+  ]
+}

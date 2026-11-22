@@ -1,0 +1,20 @@
+{
+  "id": "yyvy",
+  "name": "VY音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.yyvy.cn",
+      "yyvy.cn"
+    ]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "Charts", "page": "charts", "icon": "chart" },
+    { "title": "Categories", "page": "genres", "icon": "playlist" },
+    { "builtin": "liked", "title": "Liked Songs" }
+  ]
+}

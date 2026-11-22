@@ -1,0 +1,42 @@
+{
+  "id": "ting55",
+  "name": "恋听网",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "ting55.com",
+      "*.ting55.com",
+      "m.ting55.com",
+      "i.ting55.com",
+      "pp.ting55.com"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": ["i.ting55.com"],
+      "kinds": ["image"],
+      "headers": {
+        "referer": "https://ting55.com/"
+      }
+    },
+    {
+      "hosts": ["pp.ting55.com"],
+      "kinds": ["audio"],
+      "headers": {
+        "referer": "https://ting55.com/"
+      }
+    }
+  ],
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "推荐", "page": "tuijian:1", "icon": "music" },
+    { "title": "玄幻", "page": "category:1:1", "icon": "album" },
+    { "title": "都市", "page": "category:3:1", "icon": "album" },
+    { "title": "言情", "page": "category:4:1", "icon": "album" },
+    { "title": "评书", "page": "category:14:1", "icon": "album" },
+    { "title": "相声", "page": "category:12:1", "icon": "album" }
+  ]
+}

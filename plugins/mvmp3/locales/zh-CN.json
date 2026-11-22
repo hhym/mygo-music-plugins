@@ -1,0 +1,13 @@
+{
+  "Charts": "排行榜",
+  "Playlists": "歌单",
+  "Singers": "歌手",
+  "Categories": "分类",
+  "Pages": "翻页",
+  "Previous": "上一页",
+  "Next": "下一页",
+  "Liked Songs": "我的喜欢",
+  "Saved Albums": "收藏专辑",
+  "Session cookie (optional)": "会话 Cookie（可选）",
+  "Only if the site's robot check keeps failing. Open www.mvmp3.com in a browser, pass the check, then copy the Cookie request header from the developer tools and paste it here.": "只在站点的人机验证反复失败时使用：在浏览器打开 www.mvmp3.com 通过验证，再从开发者工具里复制 Cookie 请求头粘贴到这里。"
+}

@@ -1,0 +1,41 @@
+{
+  "id": "5sing",
+  "name": "5sing",
+  "version": "1.0.0",
+  "main": "index.js",
+  "minAppVersion": "0.1.20",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "*.kugou.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "Charts",
+      "page": "charts",
+      "icon": "chart"
+    },
+    {
+      "title": "Playlists",
+      "page": "playlists",
+      "icon": "playlist"
+    },
+    {
+      "title": "Artists",
+      "page": "artists",
+      "icon": "artist"
+    },
+    {
+      "title": "Recently Played",
+      "page": "recent",
+      "icon": "note"
+    },
+    {
+      "builtin": "liked"
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 8 个，每个站点一个目录，界面文案全部中文写死（不提供 `locales/en.json`，宿主把语言报成 `en` 时也不会翻成英文）。
+一共 19 个，每个站点一个目录，界面文案全部中文写死（不提供 `locales/en.json`，宿主把语言报成 `en` 时也不会翻成英文）。
 
 ## 插件列表
 
@@ -16,6 +16,22 @@
 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | 1.0.0 | 目录能看，试听走网易云匹配 |
 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | 1.0.0 | 音单能，单曲是 DRM 加密 HLS |
 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | 1.0.0 | 能，有声小说章节直链 |
+
+## 新增插件（11 个）
+
+| 插件 | 站点 | 版本 | 能不能播 |
+| --- | --- | --- | --- |
+| [闪闪音乐](plugins/33ve/) | [www.33ve.com](https://www.33ve.com/) | 1.0.0 | 能，MP3 直链 + LRC |
+| [5sing](plugins/5sing/) | [5sing.kugou.com](https://5sing.kugou.com/) | 1.0.0 | 能，原创 / 翻唱 / 伴奏 |
+| [动感酷音乐](plugins/dgcol/) | [www.dgcol.com](https://www.dgcol.com/) | 1.0.0 | 能，每日热歌与歌词 |
+| [GD音乐台](plugins/gdstudio/) | [music.gdstudio.org](https://music.gdstudio.org/) | 1.0.0 | 能，公开聚合 API |
+| [好听轻音乐](plugins/htqyy/) | [www.htqyy.com](http://www.htqyy.com/) | 1.0.0 | 能，轻音乐 MP3 |
+| [米乐迪音乐](plugins/imelody/) | [imelody.top](https://imelody.top/) | 1.0.0 | 能，FLAC / MP3 |
+| [米粒音乐](plugins/milimusic/) | [www.milimusic.cn](http://www.milimusic.cn/) | 1.0.0 | 播放走网易云同名匹配 |
+| [无名音乐](plugins/mvmp3/) | [www.mvmp3.com](https://www.mvmp3.com/) | 1.0.0 | 能，MP3 + LRC |
+| [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | 1.0.0 | 能，章节 token 换 MP3 |
+| [小蜜蜂音乐](plugins/xmfwav/) | [www.xmfwav.com](https://www.xmfwav.com/) | 1.0.1 | 能，优先网易云 MP3 |
+| [VY音乐](plugins/yyvy/) | [www.yyvy.cn](https://www.yyvy.cn/) | 1.0.0 | 能，原创与榜单 |
 
 ## 安装
 
@@ -60,10 +76,54 @@ Discuz! 论坛，GBK 编码，帖子当专辑、附件要回复才能下载，�
 
 有声小说站，书 = 专辑、章节 = 曲目。章节页的 `chapter_data.videourl` 是明文直链（m4a，或五集合一的 mp3），不带 UA、不带 Referer 也能取，`Range` 回 206。站点自带的 `/e/search` 对游客一律返回「没有搜索到相关的内容」，所以插件用 `/sitemap.html` 和 35 页书籍列表自建搜索索引，落在 `host.storage` 里缓存一小时，进首页时后台预热。
 
+### 闪闪音乐（33ve）
+
+榜单、歌单、歌手、搜索，在线 MP3 与 LRC 歌词。
+
+### 5sing（5sing）
+
+原创、翻唱、伴奏榜单，歌单广场、音乐人主页、搜索、播放与歌词。
+
+### 动感酷音乐（dgcol）
+
+每日热歌、近期更新、搜索、在线播放和歌词。
+
+### GD音乐台（gdstudio）
+
+站点是 SPA，插件直接调用公开聚合 API，提供榜单、歌单、搜索、歌词与在线播放。
+
+### 好听轻音乐（htqyy）
+
+轻音乐精选、分类、榜单、搜索与 MP3 播放。
+
+### 米乐迪音乐（imelody）
+
+按年代浏览华语乐坛编年史，热门经典、最新收录、搜索、歌词与 FLAC / MP3 播放。
+
+### 米粒音乐（milimusic）
+
+站点是 GB2312 页面，插件内置 GBK 解码表；站点本身只有 Flash 播放器，播放与歌词按歌名、歌手匹配网易云。
+
+### 无名音乐（mvmp3）
+
+榜单、歌单、歌手、专辑、搜索，在线试听 MP3 并显示 LRC 歌词。
+
+### 恋听网（ting55）
+
+有声小说站，书 = 专辑、集 = 曲目。章节页读取一次性 token 调 `POST /nlinka` 换 `pp.ting55.com` 的 MP3，失败时走移动版 `/glink` 兜底。
+
+### 小蜜蜂音乐（xmfwav）
+
+新歌、热门排行、歌手作品、搜索、歌词；播放优先匹配网易云 MP3，避免站内 Ogg 试听在部分播放器上无法出声。
+
+### VY音乐（yyvy）
+
+最新原创音乐、热门试听、高分推荐、榜单、分类、搜索与在线播放。
+
 ## 目录
 
 ```
-plugins/<id>/     plugin.json + index.js + README.md
+plugins/<id>/     plugin.json + index.js + README.md（可选 locales/）
 dist/             打包好的 zip，按显示名命名
 ```
 
