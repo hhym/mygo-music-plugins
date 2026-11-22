@@ -53,8 +53,8 @@
 
 两个下载入口，内容完全一样：
 
-- 单个插件带版本号：[Releases](https://github.com/hhym/mygo-music-plugins/releases/latest) 里每个插件一个 zip，例如 `5nd音乐-1.6.0-mygo插件.zip`；
-- 仓库内 `dist/` 目录：不带版本号的同名 zip，随 main 分支更新。
+- [Releases](https://github.com/hhym/mygo-music-plugins/releases/latest)：每个插件一个 zip，文件名是 `id-版本.zip`，例如 `5nd-music-1.6.0.zip`（纯 ASCII，不会因中文名下载乱码）；
+- 仓库内 `dist/` 目录：中文显示名命名的同名包，不带版本号，随 main 分支更新。
 
 ## 各插件说明
 
