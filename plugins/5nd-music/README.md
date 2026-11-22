@@ -10,7 +10,7 @@
 2. zip：设置 → 插件 → `+` → 从本机选择 `5nd音乐-mygo插件.zip`。
 3. GitHub：把本目录推到公开仓库，加 `mygo-music-plugin` topic，即可「从 GitHub 安装」。
 
-`minAppVersion` 是 `0.1.20`，当前版本 1.5.0。
+`minAppVersion` 是 `0.1.20`，当前版本 1.6.0。
 
 ## 功能
 
@@ -51,7 +51,7 @@
 
 ## 文案
 
-插件自己说的话（错误提示、榜单/歌手/专辑入口名、设置项）直接用中文写在 `index.js` 和 `plugin.json` 里。千千静听宿主报的语言是 `en`，`host.t` 会去读 `locales/en.json`，所以这份英文对照已经删掉：没有英文可查，`t()` 就原样返回中文。
+插件自己说的话（错误提示、榜单/歌手/专辑入口名、设置项）直接用中文写在 `index.js` 和 `plugin.json` 里，不依赖 `locales` 是否被宿主加载；`locales/zh-CN.json` 和 `locales/en.json` 只是给能读 `host.t` 的宿主做补充。之前出现英文提示，就是因为那份 `zh-CN.json` 在当前宿主里没被应用。
 
 ## 排查
 
@@ -64,12 +64,14 @@
 
 `stream()` 会先用一次 `Range: bytes=0-1` 的试探请求确认音频能不能取：能取（200/206）才把地址交给播放器；取不到（302/403/502）就直接抛 `unavailable`，给一句人话，而不是让播放器报「HTTP 502」。
 
-插件设置里有一项「音频被拒时用浏览器打开」（默认关）：打开后点击播放会用系统浏览器打开这首歌的 5nd 页面，在浏览器里听；整张专辑播放会一首开一个标签页，所以默认没开。
+1.5.0 起（1.6.0 延续），「音频被拒时用浏览器打开」默认就是开的，不需要再进设置：点播放探测到音频被拒，插件会直接把这首歌的 5nd 页面交给系统浏览器打开（同一首歌 45 秒内只开一个标签页，整张专辑连播不会刷一屏标签）。
+
+想彻底不在浏览器里跳，可以在设置里把这一项改成「只在 App 里播（5nd 播不了）」；那之后点击播放会得到一条错误提示，说明 App 内播不了。
 
 音频在 `mpge.5nd.com`，这个域名有防盗链：
 
 - Chrome 直接取同一个 URL 返回 `200/206`，文件是真的 mp3；
-- curl / Node / Go 直接取，全部 `302` 到 `http://127.0.0.1:1234`（换了 Chrome 的 TLS 指纹、补齐 Referer/UA/sec-fetch 头也一样）。
+- curl / Node / Go 直接取，全部 `302` 到 `http://127.0.0.1:1234`（补齐 Chrome UA、Referer、sec-fetch-*、Accept-Encoding、Cookie 也一样）。
 
 插件能做的是把浏览器那套请求头交给 App：`stream()` 返回 `headers`（Referer 指向该歌曲页 + Chrome UA），`plugin.json` 里也对 `audio` 加了同样的 `requestHeaders`。如果 App 的音频请求仍被 302，说明它走的是非浏览器协议栈，属于站点限制，不是插件解析问题。此时可以在插件设置里粘贴浏览器 Cookie（打开歌曲页试听一次后，从开发者工具复制 `mpge.5nd.com` 请求的 Cookie），插件会把它一起带上。
 
@@ -79,6 +81,7 @@
 mygo-plugin-5nd-music/
 ├─ plugin.json          清单：id、权限（只放行 www.5nd.com）、导航、音频请求头、设置
 ├─ index.js             全部逻辑，纯 ESM，无构建
-├─ locales/zh-CN.json   中文界面（只是兜底，插件文案本身已是中文）
+├─ locales/zh-CN.json   中文界面（插件文案本身就是中文，这里做兜底）
+├─ locales/en.json      英文界面
 └─ README.md
 ```

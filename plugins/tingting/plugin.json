@@ -1,0 +1,24 @@
+{
+  "id": "tingting",
+  "name": "听听网",
+  "version": "1.0.1",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.ttw.cx",
+      "antiserver.kuwo.cn"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "排行榜",
+      "page": "charts",
+      "icon": "chart"
+    }
+  ]
+}

@@ -2,14 +2,14 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 19 个，每个站点一个目录，界面文案全部中文写死（不提供 `locales/en.json`，宿主把语言报成 `en` 时也不会翻成英文）。
+一共 23 个，每个站点一个目录。早期插件界面文案中文写死；新加的四个带 `locales/`（`zh-CN.json` + `en.json`），宿主语言是 `en` 时显示英文。
 
 ## 插件列表
 
 | 插件 | 站点 | 版本 | 能不能播 |
 | --- | --- | --- | --- |
 | [世纪音乐](plugins/4c44-music/) | [www.4c44.com](https://www.4c44.com/) | 1.1.0 | 能，MP3 直链 + 动态歌词 |
-| [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | 1.5.0 | 大部分能，电台类分片流播不了 |
+| [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | 1.6.0 | 音频域名只认浏览器，默认自动跳浏览器 |
 | [凤梨音乐](plugins/flmp3-music/) | [www.flmp3.pro](https://www.flmp3.pro/) | 1.0.0 | 能，音频走酷我 CDN |
 | [优折美音乐](plugins/uzz-music/) | [m.uzz.me](https://m.uzz.me/) | 1.0.0 | 播不了，站点接口被 CloudFront 拦了 |
 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | 1.0.0 | 能，非独家完整版、独家片段 |
@@ -32,6 +32,15 @@
 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | 1.0.0 | 能，章节 token 换 MP3 |
 | [小蜜蜂音乐](plugins/xmfwav/) | [www.xmfwav.com](https://www.xmfwav.com/) | 1.0.1 | 能，优先网易云 MP3 |
 | [VY音乐](plugins/yyvy/) | [www.yyvy.cn](https://www.yyvy.cn/) | 1.0.0 | 能，原创与榜单 |
+
+## 新增插件（4 个）
+
+| 插件 | 站点 | 版本 | 能不能播 |
+| --- | --- | --- | --- |
+| [听听网](plugins/tingting/) | [www.ttw.cx](https://www.ttw.cx/) | 1.0.1 | 能，歌词页借酷我直链 |
+| [九天音乐](plugins/nine-sky/) | [www.9sky.com](https://www.9sky.com/) | 1.0.1 | 能，MP3 + 批量封面 |
+| [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | 1.0.0 | 能，320kbps MP3 直链 |
+| [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | 1.0.0 | 跟随房间，正在播放/队列能播，搜索只读 |
 
 ## 安装
 
@@ -119,6 +128,22 @@ Discuz! 论坛，GBK 编码，帖子当专辑、附件要回复才能下载，�
 ### VY音乐（yyvy）
 
 最新原创音乐、热门试听、高分推荐、榜单、分类、搜索与在线播放。
+
+### 听听网（tingting）
+
+页面先过一道 PHP session 的「安全验证」再弹 Cookie，插件用随机 Cookie + 重载绕过去；音频不解 `playen.js` 的加密，改从 `/js/play.php` 拿 `lkid`（酷我 rid）走酷我直链，实测 206。
+
+### 九天音乐（nine-sky）
+
+歌手、专辑、榜单、搜索与 MP3 播放；专辑与歌手页会批量补封面，`requestHeaders` 里带了站点的 Referer。
+
+### 布谷音乐（buguyy-music）
+
+Nuxt SPA，只有 `hotlist` / `newlist` / `search` / `geturl` 四条公开接口，搜索固定 50 条无分页；音频是酷我 `car-*.kuwo.cn` 的 320kbps MP3，裸请求 206，封面路径里的尺寸换成了 `{size}`。
+
+### 一起听歌吧（jusic-room）
+
+Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全走 SockJS + STOMP，插件用 xhr 轮询实现匿名进房。只读跟随：正在播放与待播队列带服务端签好的直链，能播；搜索只有元数据（直链只在点歌入队那一刻签出来），所以搜索条目标为不可播，插件从不发 `/music/pick`，不往房间投歌。
 
 ## 目录
 

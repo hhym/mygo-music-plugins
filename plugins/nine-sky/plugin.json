@@ -1,0 +1,42 @@
+{
+  "id": "nine-sky",
+  "name": "九天音乐",
+  "version": "1.0.1",
+  "minAppVersion": "0.1.8",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.9sky.com",
+      "new.9sky.com",
+      "sp.9sky.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "排行榜",
+      "page": "charts",
+      "icon": "chart"
+    },
+    {
+      "builtin": "stations"
+    }
+  ],
+  "requestHeaders": [
+    {
+      "hosts": [
+        "sp.9sky.com"
+      ],
+      "kinds": [
+        "image",
+        "audio"
+      ],
+      "headers": {
+        "referer": "http://www.9sky.com/"
+      }
+    }
+  ]
+}

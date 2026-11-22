@@ -1,0 +1,16 @@
+{
+  "5nd音乐": "5nd Music",
+  "5nd音乐网的歌曲、榜单、歌手与专辑，带动态歌词。": "Songs, charts, singers and albums from 5nd.com, with dynamic lyrics.",
+  "榜单": "Charts",
+  "歌手": "Singers",
+  "专辑": "Albums",
+  "音频被拒时用浏览器打开": "Open in browser when the audio host refuses",
+  "只在 App 里播（默认）": "Only try the app's player (default)",
+  "用浏览器打开歌曲页": "Open the song page in the browser",
+  "Cookie（可选）": "Cookie (optional)",
+  "5nd 只放行浏览器，App 内播不了。到插件设置里打开「音频被拒时用浏览器打开」，再点播放": "5nd only plays in a browser. Turn on the browser option in the plugin settings, then play again.",
+  "5nd 只放行浏览器，已用浏览器打开这首歌": "5nd only plays in a browser, so it is opening there.",
+  "音频地址暂时取不到，稍后重试": "The audio address was not available, try again in a moment.",
+  "这首歌暂时播放不了": "This song cannot be played right now.",
+  "没有这个页面": "No such page."
+}

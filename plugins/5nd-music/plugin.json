@@ -2,7 +2,7 @@
   "id": "5nd-music",
   "name": "5nd音乐",
   "description": "5nd音乐网的歌曲、榜单、歌手与专辑，带动态歌词。",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -46,15 +46,15 @@
       "type": "select",
       "options": [
         {
-          "value": "",
-          "label": "只在 App 里播（默认）"
+          "value": "on",
+          "label": "用浏览器打开歌曲页（默认）"
         },
         {
-          "value": "on",
-          "label": "用浏览器打开歌曲页"
+          "value": "off",
+          "label": "只在 App 里播（5nd 播不了）"
         }
       ],
-      "help": "5nd 的音频域名会拒绝大多数客户端。打开后点击播放会用系统浏览器打开这首歌；整张专辑播放会一首开一个标签页。"
+      "help": "5nd 的音频域名只认浏览器：App 的 Go 客户端无论带 Referer / UA / Cookie 都会被 302 到 127.0.0.1:1234。默认点播放就在系统浏览器里打开这首歌；整张专辑连播时同一首 45 秒内只开一个标签页。"
     },
     {
       "key": "cookie",

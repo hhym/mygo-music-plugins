@@ -673,6 +673,24 @@ async function playable(url) {
   return ok;
 }
 
+const openedTabs = new Map();
+
+// 整张专辑连播时，一首歌一个标签页会刷屏，所以 45 秒内同一首歌只开一次
+function openInBrowser(id, page) {
+  const key = String(id);
+  const last = openedTabs.get(key);
+  if (last && Date.now() - last < 45000) return true;
+  try {
+    if (typeof host.openURL !== "function") return false;
+    host.openURL(page);
+    openedTabs.set(key, Date.now());
+    return true;
+  } catch (error) {
+    console.log("[5nd] openURL failed: " + (error && error.message));
+    return false;
+  }
+}
+
 export async function stream({ id }) {
   const info = await songInfo(id);
   const headers = {
@@ -685,16 +703,17 @@ export async function stream({ id }) {
 
   if (!(await playable(url))) {
     const page = BASE + "/ting/" + id + ".html";
-    if (String(host.setting("browser")) === "on") {
-      try {
-        host.openURL(page);
-        throw fail("unavailable", t("5nd 只放行浏览器，已用浏览器打开这首歌"));
-      } catch (error) {
-        if (error && error.code) throw error;
-        /* the app may not offer a browser here */
+    // 默认就走浏览器兜底：5nd 的音频域名只认浏览器的 TLS 指纹，Go 客户端怎么带
+    // Referer / Cookie 都会被 302 到 127.0.0.1:1234，所以不在设置里动开关也能播。
+    const preference = String(host.setting("browser") || "").trim();
+    if (preference !== "off") {
+      const opened = openInBrowser(id, page);
+      if (opened) {
+        throw fail("unavailable", t("5nd 只放行浏览器，已在浏览器打开这首歌"));
       }
+      throw fail("unavailable", t("5nd 只放行浏览器，App 内播不了，这台机器也没法打开浏览器"));
     }
-    throw fail("unavailable", t("5nd 只放行浏览器，App 内播不了。到插件设置里打开「音频被拒时用浏览器打开」，再点播放"));
+    throw fail("unavailable", t("5nd 只放行浏览器，App 内播不了。插件设置里把「音频被拒时用浏览器打开」调回默认即可自动开浏览器"));
   }
 
   return { url: url, type: "mp3", headers: headers };

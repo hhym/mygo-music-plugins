@@ -1,0 +1,41 @@
+{
+  "id": "buguyy-music",
+  "name": "布谷音乐",
+  "description": "布谷音乐的热歌、新歌与搜索，320kbps mp3 直接播放，带 LRC 歌词。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.buguyy.top",
+      "img1.kuwo.cn",
+      "img2.kuwo.cn",
+      "img3.kuwo.cn",
+      "img4.kuwo.cn",
+      "car-bj.kuwo.cn",
+      "car-er.kuwo.cn",
+      "car-lv.kuwo.cn",
+      "car-lw.kuwo.cn",
+      "car-sh.kuwo.cn",
+      "car-ty.kuwo.cn"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "热歌",
+      "page": "hot",
+      "icon": "chart"
+    },
+    {
+      "title": "新歌",
+      "page": "new"
+    },
+    {
+      "builtin": "liked"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "id": "jusic-room",
+  "name": "一起听歌吧",
+  "description": "只读跟随 Jusic 听歌房（happy.alang.run）：房间正在播放和待播队列同步到这，能直接播；搜索可浏览房间里的曲目。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "tx.alang.run",
+      "happy.alang.run",
+      "*.music.126.net",
+      "*.kuwo.cn",
+      "y.gtimg.cn",
+      "*.gtimg.cn"
+    ]
+  },
+  "settings": [
+    {
+      "key": "houseId",
+      "label": "房间 ID",
+      "help": "默认 DEFAULT（公开的「一起听歌吧」）。首页第一屏底部的「打开房间列表」里有别的房间 ID，填到这里就换房间。"
+    },
+    {
+      "key": "housePwd",
+      "label": "房间密码（可选）",
+      "help": "只对需要密码的房间有用；公开房间留空即可。"
+    },
+    {
+      "key": "source",
+      "label": "搜索音源",
+      "type": "select",
+      "options": [
+        { "value": "wy", "label": "网易云" },
+        { "value": "qq", "label": "QQ 音乐" },
+        { "value": "mg", "label": "咪咕" },
+        { "value": "kw", "label": "酷我" },
+        { "value": "kg", "label": "酷狗" }
+      ],
+      "help": "只影响搜索结果来自哪个曲库。搜到的条目是元数据，播放要等它进了房间队列。"
+    }
+  ],
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "正在播放", "page": "now" },
+    { "title": "待播队列", "page": "queue" },
+    { "builtin": "liked" }
+  ]
+}
