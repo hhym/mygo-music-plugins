@@ -49,7 +49,12 @@
 - Windows：`%USERPROFILE%\.hulu-music\plugins\<id>\`
 - macOS / Linux：`~/.hulu-music/plugins/<id>/`
 
-或者直接解压 `dist/` 里的压缩包，把整个文件夹丢进 `plugins` 再重启 App。压缩包按显示名命名，例如 `听书网-mygo插件.zip`。
+或者直接解压压缩包，把整个文件夹丢进 `plugins` 再重启 App。压缩包按显示名命名，例如 `听书网-mygo插件.zip`。
+
+两个下载入口，内容完全一样：
+
+- 单个插件带版本号：[Releases](https://github.com/hhym/mygo-music-plugins/releases/latest) 里每个插件一个 zip，例如 `5nd音乐-1.6.0-mygo插件.zip`；
+- 仓库内 `dist/` 目录：不带版本号的同名 zip，随 main 分支更新。
 
 ## 各插件说明
 
