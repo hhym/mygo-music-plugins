@@ -106,7 +106,7 @@ export async function browse({ page } = {}) {
     title: CAT_NAME[cid],
     subtitle: `第 ${pageNo} 页`,
     sections: [
-      { title: `${CAT_NAME[cid]} · 第 ${pageNo} 页`, tracks: list, albums: albumCards(list), morePage: pageNo < max ? { page: `cat:${cid}:${pageNo + 1}`, pageTitle: CAT_NAME[cid] } : undefined, empty: list.length ? "" : "这一页没有内容" },
+      { title: `${CAT_NAME[cid]} · 第 ${pageNo} 页`, tracks: list, albums: albumCards(list), morePage: pageNo < max ? `cat:${cid}:${pageNo + 1}` : "" },
       { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${c.id}:1` })) },
     ],
   };
