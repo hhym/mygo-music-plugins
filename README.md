@@ -2,7 +2,7 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 28 个，每个站点一个目录。早期插件界面文案中文写死；新加的插件带 `locales/`（`zh-CN.json` + `en.json`），宿主语言是 `en` 时显示英文。
+一共 29 个，每个站点一个目录。早期插件界面文案中文写死；新加的插件带 `locales/`（`zh-CN.json` + `en.json`），宿主语言是 `en` 时显示英文。
 
 ## 插件列表
 
@@ -16,11 +16,13 @@
 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | 1.0.0 | 目录能看，试听走网易云匹配 |
 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | 1.0.0 | 音单能，单曲是 DRM 加密 HLS |
 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | 1.0.0 | 能，有声小说章节直链 |
+| [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | 1.0.0 | 能，m4a 直链（带 vsid 令牌，可拖进度） |
 
-## 全部插件（28 个）
+## 全部插件（29 个）
 
 | 插件 | 目录 | 版本 |
 | --- | --- | --- |
+| [36DJ舞曲](plugins/36dj-music/) | `36dj-music` | 1.0.0 |
 | [飞卢听书](plugins/faloo/) | `faloo` | 0.1.0 |
 | [275听书](plugins/i275/) | `i275` | 0.1.0 |
 | [单田芳评书网](plugins/pingshu5/) | `pingshu5` | 0.1.0 |
@@ -217,3 +219,7 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 ### 悦听吧（yuetingba）
 
 分类 `/book/<id>/1`、详情 `/book/detail/<uuid>/<page>`；搜索走站内 `/search?type=1&name=<q>&pageIndex=1`，「全部专辑」按 9 个分类合并去重、逐页翻完，全站 1002 本（快照见 `data/yuetingba-all-albums.json`）；支持 `album({id})` 读取整本专辑全部章节（每 200 集一页），例如《超品相师》2280 集、《庆余年》1865 集；单集播放调 `/api/app/docs-listen/<章节ID>/audio-url` 拿 MP3 直链，失败才回退蜻蜓。
+
+### 36DJ舞曲（36dj-music）
+
+帝国CMS 老站，DJ 舞曲、串烧与车载大碟，中文 / 英文 / 慢摇五类分类加人气榜。详情页 `var info = { "playurl": "2026/3611/16eva/36dj_17590.m4a" }` 给出路径，音频在 `tn2.72djapp.cn`；**裸地址一律 403，必须带 `?vsid=` 令牌**，令牌来自 `/js/lb/a.js`（`var vsid = '…'` + `var vsidExpire = <unix 秒>`），约十分钟一换。插件每次播放重新取令牌，令牌刚生成 90 秒内直接用，探测回 403 就强制重取；带令牌即 206 + `audio/mp4`，能拖进度。搜索是帝国CMS 原生 POST + `searchid` 翻页；下载页只有登录引导，不做。

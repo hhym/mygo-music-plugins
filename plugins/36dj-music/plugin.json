@@ -1,0 +1,21 @@
+{
+  "id": "36dj-music",
+  "name": "36DJ舞曲",
+  "description": "36DJ舞曲网（www.36dj.com）的DJ舞曲、串烧与车载大碟，含中文、英文、慢摇分类与人气榜。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.36dj.com", "tn2.72djapp.cn"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "最新上传", "page": "latest" },
+    { "title": "串烧舞曲", "page": "category/xc" },
+    { "title": "中文舞曲", "page": "category/zw" },
+    { "title": "英文舞曲", "page": "category/yw" },
+    { "title": "人气榜", "page": "rank" },
+    { "builtin": "liked" }
+  ]
+}
