@@ -1,0 +1,31 @@
+{
+  "id": "tangdou",
+  "name": "糖豆音乐",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "api-h5.tangdou.com",
+      "mp3qiniu.tangdou.com",
+      "aimg.tangdou.com",
+      "www.tangdou.com",
+      "static.tangdou.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ]
+}

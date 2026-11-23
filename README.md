@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 30 个，每个站点一个目录。30 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 31 个，每个站点一个目录。31 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（30 个）
+## 插件列表（31 个）
 
-按类型分四组：音乐 19 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+按类型分四组：音乐 20 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
-### 音乐（19 个）
+### 音乐（20 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -31,6 +31,7 @@
 | 17 | [九天音乐](plugins/nine-sky/) | [www.9sky.com](https://www.9sky.com/) | `nine-sky` | 1.0.1 | 能，MP3 + 批量封面 |
 | 18 | [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | `buguyy-music` | 1.0.0 | 能，320kbps MP3 直链 |
 | 19 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
+| 20 | [糖豆音乐](plugins/tangdou/) | [www.tangdou.com/music](https://www.tangdou.com/music/) | `tangdou` | 0.1.0 | 能，MP3 直链；搜索为本地遍历匹配 |
 
 ### DJ音乐（2 个）
 
@@ -267,3 +268,7 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 
 基线是 `probe.mjs --json` 的原始输出，带时间戳，所以「什么时候、谁的版本、什么状态」都留得住。
 
+
+### 糖豆音乐（tangdou）
+
+`api-h5.tangdou.com` 的 `/pc/music/list` 分「舞曲推荐 type=1」「新歌速递 type=2」，每页 30 首；`/pc/music/play?id=` 返回歌名、作者、封面、歌词和 `mp3qiniu.tangdou.com` 的 MP3 直链。站点没有公开搜索接口，搜索改为并发遍历两类前 7 页做本地匹配。
