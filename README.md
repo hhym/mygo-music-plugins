@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 32 个，每个站点一个目录。32 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 42 个，每个站点一个目录。42 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（32 个）
+## 插件列表（42 个）
 
-按类型分四组：音乐 21 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+按类型分四组：音乐 21 个、DJ音乐 2 个、听书 18 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
 ### 音乐（21 个）
 
@@ -41,7 +41,7 @@
 | 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
 | 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
 
-### 听书（8 个）
+### 听书（18 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -53,6 +53,16 @@
 | 6 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
 | 7 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
 | 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.0 | 能，HE-AAC 用本机 ffmpeg 转 AAC-LC；站点回源 503 频繁，插件双域名并发重试 |
+| 9 | [环球听书](plugins/hqkomics/) | [hqkomics.com](https://hqkomics.com/) | `hqkomics` | 0.1.0 | 能，喜马拉雅 CDN 的 m4a 直链，Range 206 |
+| 10 | [更快听书](plugins/gkbasic/) | [gkbasic.com](https://gkbasic.com/) | `gkbasic` | 0.1.0 | 能，同上，详情在 `/basic/` |
+| 11 | [爱上听书](plugins/kmbas/) | [kmbas.com](https://kmbas.com/) | `kmbas` | 0.1.0 | 能，同上，书号和集号前缀不同 |
+| 12 | [59听书](plugins/ting59/) | [59ting.com](https://59ting.com/) | `ting59` | 0.1.0 | 能，详情 `/ting/`，m4a 206 |
+| 13 | [三九听书](plugins/sanjiuwang/) | [sanjiuwang.com](https://sanjiuwang.com/) | `sanjiuwang` | 0.1.0 | 能，m4a 206 |
+| 14 | [瓜播听书](plugins/guabo/) | [guabo.net](https://guabo.net/) | `guabo` | 0.1.0 | 站点当前回 503，代码已就位，等恢复 |
+| 15 | [伊薇听书](plugins/eweizhi/) | [www.eweizhi.com](https://www.eweizhi.com/) | `eweizhi` | 0.1.0 | 站点当前 520（Cloudflare 源站错误） |
+| 16 | [一一听书](plugins/eyihu/) | [eyihu.com](https://eyihu.com/) | `eyihu` | 0.1.0 | 站点当前回 503 |
+| 17 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
+| 18 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
 
 ### 评书（1 个）
 
@@ -202,6 +212,46 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集音频，源多为喜马拉雅 HE-AAC；插件默认调用本机 ffmpeg 转成 AAC-LC 再播放，缓存 8 集到插件数据目录，没有 ffmpeg 时会在设置里提示。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
 
+### 环球听书（hqkomics）
+
+站点：https://hqkomics.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 更快听书（gkbasic）
+
+站点：https://gkbasic.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 爱上听书（kmbas）
+
+站点：https://kmbas.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 59听书（ting59）
+
+站点：https://59ting.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 三九听书（sanjiuwang）
+
+站点：https://sanjiuwang.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 瓜播听书（guabo）
+
+站点：https://guabo.net。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 伊薇听书（eweizhi）
+
+站点：https://www.eweizhi.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 一一听书（eyihu）
+
+站点：https://eyihu.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 我爱听书（ipangxie）
+
+站点：https://ipangxie.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
+### 幻听听书（q062）
+
+站点：https://2q06.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
+
 ## 评书
 
 传统评书，单一站点。
@@ -241,12 +291,12 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 
 ### locales 现状
 
-32 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
+42 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
 
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 16 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 28 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 
