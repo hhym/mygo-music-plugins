@@ -77,12 +77,12 @@
 - Windows：`%USERPROFILE%\.hulu-music\plugins\<id>\`
 - macOS / Linux：`~/.hulu-music/plugins/<id>/`
 
-或者直接解压压缩包，把整个文件夹丢进 `plugins` 再重启 App。压缩包一律按插件 id 命名（纯 ASCII，例如 `hqkomics.zip`），中文显示名写在各插件 `plugin.json` 的 `name`、`index.js` 首行注释和上表的「插件」列里，不进文件名——避免中文名在 Windows/macOS 解压时乱码。
+或者直接解压压缩包，把整个文件夹丢进 `plugins` 再重启 App。压缩包一律按 `id-版本` 命名（纯 ASCII，例如 `hqkomics-0.1.0.zip`），中文显示名写在各插件 `plugin.json` 的 `name`、`index.js` 首行注释和上表的「插件」列里，不进文件名——避免中文名在 Windows/macOS 解压时乱码。
 
 两个下载入口，内容完全一样：
 
 - [Releases](https://github.com/hhym/mygo-music-plugins/releases/latest)：每个插件一个 zip，文件名是 `id-版本.zip`，例如 `5nd-music-1.6.0.zip`（纯 ASCII，不会因中文名下载乱码）；
-- 仓库内 `dist/` 目录：`<id>.zip`，同样纯 ASCII，不带版本号，随 main 分支更新（中文对照见上方插件列表）。
+- 仓库内 `dist/` 目录：`<id>-<版本>.zip`，同样纯 ASCII 并带版本号，随 main 分支更新（中文对照见上方插件列表）。
 
 ## 音乐
 
@@ -264,7 +264,7 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 ```
 plugins/<id>/     plugin.json + index.js + README.md（可选 locales/）
-dist/             打包好的 zip，<id>.zip（ASCII，随 main 更新）
+dist/             打包好的 zip，<id>-<版本>.zip（ASCII，带版本号，随 main 更新）
 release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases 用）
 ```
 
@@ -280,7 +280,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 | 脚本 | 作用 |
 | --- | --- |
-| `./scripts/pack.sh` | 从 `plugin.json` 读 id / 显示名 / 版本，统一产出 `dist/<id>.zip` 与 `release/<id>-<版本>.zip`（都是 ASCII 名），`locales/` 有就一起打进去 |
+| `./scripts/pack.sh` | 从 `plugin.json` 读 id / 显示名 / 版本，统一产出 `dist/<id>-<版本>.zip` 与 `release/<id>-<版本>.zip`（都是 ASCII 名，都带版本号），`locales/` 有就一起打进去 |
 | `./scripts/pack.sh <id>` | 只重打一个插件，例如 `./scripts/pack.sh 36dj-music` |
 | `./scripts/pack.sh --check` | 只比对，不动文件：解压 `dist/` 里的包读 `plugin.json`，版本与源码不符就报「过期」，缺包报「缺失」 |
 | `./scripts/locales.mjs` | 从 `index.js` 抓出所有 `t("…")` 原文，补 `locales/zh-CN.json`；`--check` 只报告谁还缺 |

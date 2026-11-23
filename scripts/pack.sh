@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 统一打包：每个插件从 plugins/<dir>/ 一次性产出两个包
-#   dist/<id>.zip                  ASCII 名（标准命名），随 main 分支更新
+#   dist/<id>-<版本>.zip           ASCII 名（标准命名），随 main 分支更新
 #   release/<id>-<版本>.zip        ASCII 名，用于 GitHub Releases
 #
 # dist 包名统一用插件 id（小写、连字符、纯 ASCII），中文显示名只写在
@@ -65,12 +65,12 @@ for dir in plugins/*/; do
 
   [ -z "$ONLY" ] || [ "$ONLY" = "$id" ] || continue
 
-  chinese="dist/$id.zip"
+  chinese="dist/$id-$version.zip"
   ascii="release/$id-$version.zip"
 
   if [ "$CHECK" = 1 ]; then
     if [ ! -f "$ROOT/$chinese" ]; then
-      echo "缺失  $id v$version → dist/$id.zip"
+      echo "缺失  $id v$version → dist/$id-$version.zip"
       missing=$((missing + 1))
     else
       packed=$(zip_version "$ROOT/$chinese")
@@ -92,7 +92,7 @@ for dir in plugins/*/; do
   ( cd "$dir" && zip -q -r -X "$ROOT/$ascii" "${files[@]}" )
   cp "$ROOT/$ascii" "$ROOT/$chinese"
 
-  echo "$(printf '%-24s' "$id") $version  ($name)  →  dist/$id.zip"
+  echo "$(printf '%-24s' "$id") $version  ($name)  →  dist/$id-$version.zip"
   count=$((count + 1))
 done
 
@@ -101,5 +101,5 @@ if [ "$CHECK" = 1 ]; then
   echo "检查 $count 个插件：缺失 $missing，过期 $stale"
   [ $((missing + stale)) -eq 0 ] || exit 2
 else
-  echo "共 $count 个插件：dist/<id>.zip + release/<id>-<版本>.zip（均 ASCII 命名）"
+  echo "共 $count 个插件：dist/<id>-<版本>.zip + release/<id>-<版本>.zip（均 ASCII 命名，带版本号）"
 fi
