@@ -150,6 +150,70 @@ export async function album({ id } = {}) {
   return { album: alb, tracks };
 }
 
+// 85听书网的音频来自喜马拉雅，多数是 HE-AAC（SBR/PS），应用自带的 AAC
+// 解码器放不了，所以先用 ffmpeg 转成 AAC-LC 再交给播放器。固定几个槽位，
+// 避免缓存文件无限增长。
+const SLOTS = 8;
+const slotOf = (id) => {
+  let h = 0;
+  for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) % SLOTS;
+  return h;
+};
+function transcodeOn() {
+  const v = typeof host.setting === "function" ? host.setting("transcode") : "";
+  return v === undefined || v === null || v === "" ? true : String(v) !== "0";
+}
+const isWindows = /win/i.test(host.platform || "");
+const SEP = isWindows ? "\\" : "/";
+const fileFor = (slot) => `${String(host.dataDir).replace(/[\\/]+$/, "")}${SEP}85ting-${slot}.m4a`;
+function fileURL(path) {
+  let p = String(path).replace(/\\/g, "/");
+  if (/^[A-Za-z]:/.test(p)) p = "/" + p;
+  if (!p.startsWith("/")) p = "/" + p;
+  return "file://" + p.split("/").map((part) => encodeURIComponent(part).replace(/%3A/gi, ":")).join("/");
+}
+const FFMPEG_DIRS = {
+  darwin: ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"],
+  linux: ["/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/snap/bin/ffmpeg"],
+  win32: ["ffmpeg.exe", "C:\\ffmpeg\\bin\\ffmpeg.exe", "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"],
+};
+function candidates() {
+  const set = host.setting("ffmpegPath");
+  const list = [];
+  if (set) list.push(String(set));
+  if (isWindows) list.push("ffmpeg.exe", "ffmpeg");
+  else list.push("ffmpeg");
+  for (const p of FFMPEG_DIRS[isWindows ? "win32" : host.platform] || []) list.push(p);
+  return [...new Set(list)];
+}
+async function transcode(url, path, referer) {
+  if (typeof host.spawn !== "function") throw new Error("host.spawn is not available");
+  let last = "";
+  for (const bin of candidates()) {
+    let p;
+    try {
+      p = host.spawn(bin, [
+        "-y", "-hide_banner", "-loglevel", "error",
+        "-headers", `Referer: ${referer}\r\nUser-Agent: ${UA}\r\n`,
+        "-i", url,
+        "-vn", "-c:a", "aac", "-b:a", "64k",
+        "-movflags", "+faststart", path,
+      ]);
+    } catch (e) { last = `${bin}: ${e}`; continue; }
+    if (!p) { last = `${bin}: spawn refused`; continue; }
+    let code = 0;
+    try { code = await p.wait(); } catch (e) { last = `${bin}: ${e}`; continue; }
+    let said = "";
+    try { said = (await p.errorOutput()) || ""; } catch {}
+    if (code === undefined || code === null || code === 0) {
+      if (!said) return;
+    }
+    last = `${bin}: ${String(said).trim().slice(0, 160) || `exit ${code}`}`;
+    console.log(`ffmpeg attempt failed — ${last}`);
+  }
+  throw new Error(last || "ffmpeg not found");
+}
+
 export async function stream({ id } = {}) {
   let target = String(id || "");
   if (!/\/play\//.test(target)) {
@@ -163,7 +227,25 @@ export async function stream({ id } = {}) {
   const page = await fetchText(target);
   const u = (page.match(/var\s+now\s*=\s*"([^"]+)"/i) || [])[1];
   if (!u) throw fail("unavailable", "源站没有返回音频地址");
-  return { url: u, type: streamType(u), headers: { referer: abs(target), "user-agent": UA }, title: "" };
+  const referer = abs(target);
+  if (!transcodeOn()) return { url: u, type: streamType(u), headers: { referer, "user-agent": UA }, title: "" };
+
+  const slots = stored("85ting:slots", []);
+  const key = String(target);
+  let slot = slots.indexOf(key);
+  if (slot < 0) {
+    slot = slots.findIndex((k) => !k);
+    if (slot < 0) slot = slotOf(key);
+  }
+  const path = fileFor(slot);
+  try {
+    await transcode(u, path, referer);
+    slots[slot] = key;
+    save("85ting:slots", slots);
+    return { url: fileURL(path), type: "m4a", title: "" };
+  } catch (e) {
+    throw fail("setup", `85听书网的音频是 HE-AAC，需要本机安装 ffmpeg 并允许插件运行它 — ${e && e.message ? e.message : e}`);
+  }
 }
 
 export function lyrics() { return {}; }

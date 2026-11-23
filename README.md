@@ -50,7 +50,7 @@
 | 5 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
 | 6 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
 | 7 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
-| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.1.1 | 能，播放页 `var now` 取 m4a；站点回源 503 频繁，插件双域名并发重试 |
+| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.0 | 能，HE-AAC 用本机 ffmpeg 转 AAC-LC；站点回源 503 频繁，插件双域名并发重试 |
 
 ### 评书（1 个）
 
@@ -198,7 +198,7 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 ### 85听书网（85ting）
 
-首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集 m4a 直链。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
+首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集音频，源多为喜马拉雅 HE-AAC；插件默认调用本机 ffmpeg 转成 AAC-LC 再播放，缓存 8 集到插件数据目录，没有 ffmpeg 时会在设置里提示。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
 
 ## 评书
 
@@ -267,6 +267,3 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 
 基线是 `probe.mjs --json` 的原始输出，带时间戳，所以「什么时候、谁的版本、什么状态」都留得住。
 
-### 85听书网（85ting）
-
-首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集 m4a 直链。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
