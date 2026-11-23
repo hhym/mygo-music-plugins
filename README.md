@@ -2,9 +2,9 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 29 个，每个站点一个目录。29 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 30 个，每个站点一个目录。29 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（29 个）
+## 插件列表（30 个）
 
 按加入的先后排列，和 git 提交顺序对得上：最早那批 9 个，之后 2026-11-22 一天内补了 11、4、5 三批。36DJ舞曲是最后补做的，按最初名单的位次留在第 9。
 
@@ -56,6 +56,12 @@
 | 27 | [单田芳评书网](plugins/pingshu5/) | [www.pingshu5.net](http://www.pingshu5.net) | `pingshu5` | 0.1.1 | 能，源音频是微信语音、易失效，走蜻蜓 FM 兜底 |
 | 28 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
 | 29 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
+
+### 第五批（1 个，2026-11-23）
+
+| # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
+| --- | --- | --- | --- | --- | --- |
+| 30 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.1.0 | 能，播放页 `var now` 取 m4a；站点回源 503 频繁，插件双域名并发重试 |
 
 版本号直接取自各插件的 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
@@ -249,3 +255,7 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 - 确认退化可以接受（比如站点真下架了）再跑 `--update` 收进基线。
 
 基线是 `probe.mjs --json` 的原始输出，带时间戳，所以「什么时候、谁的版本、什么状态」都留得住。
+
+### 85听书网（85ting）
+
+首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集 m4a 直链。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。

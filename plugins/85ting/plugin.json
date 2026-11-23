@@ -1,0 +1,31 @@
+{
+  "id": "85ting",
+  "name": "85听书网",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "85ting.com",
+      "www.85ting.com",
+      "*.85ting.com",
+      "imagev2.xmcdn.com",
+      "aod.cos.tx.xmcdn.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ]
+}
