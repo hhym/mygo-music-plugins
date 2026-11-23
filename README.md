@@ -251,3 +251,8 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 - `.github/workflows/probe.yml`：每周一 09:00（北京时间）跑一遍 `probe.mjs` 和 `pack.sh --check`，结果写进 Job Summary 并留 artifact。**注意 runner 在海外**，国内站点回 403 / 503 属预期，不能当插件失效的判据；真正的基线在自己的国内机器上跑同一脚本。
 - `.github/workflows/scout.yml`：手动触发，填一个 URL，用海外出口抓回原始页面（附 Referer / UA），页面进 artifact。适合本机出口被站点拦住（403、503）时，先看清对方页面结构再改插件。
+
+### 文档
+
+- `docs/探测基线-2026-11-23.md`：国内出口的第一次全量探测，29 个插件的可播 / 报错逐条解读，以后对比用；
+- `docs/受阻站点.md`：查了但验证不了的站（72DJ 被三个出口全拒、dju8 只有 wma），附本机复核命令。

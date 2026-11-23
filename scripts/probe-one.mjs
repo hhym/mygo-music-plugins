@@ -65,6 +65,7 @@ try {
       const home = await plugin.home();
       const sections = (home && home.sections) || [];
       let first = null;
+      let sheet = null;
       for (const section of sections) {
         const track = ((section && section.tracks) || []).find((item) => item && item.id);
         if (track) {
@@ -72,7 +73,26 @@ try {
           break;
         }
       }
-      result.home = "ok " + sections.length + " 块";
+
+      /* 听书 / 电台类插件的首页常常只有专辑或歌单，没有直接可播的曲目，
+         这里顺着第一个专辑取一首，避免把「首页没有曲目」误读成不能播。 */
+      if (!first) {
+        const sheets = [];
+        for (const section of sections) {
+          for (const item of (section && section.albums) || []) if (item && item.id) sheets.push(item.id);
+        }
+        if (sheets.length && typeof plugin.album === "function") {
+          try {
+            sheet = await plugin.album({ id: sheets[0] });
+            first = ((sheet && sheet.tracks) || []).find((item) => item && item.id) || null;
+            if (first) note("首页只有专辑，取第 1 本的第一首");
+          } catch (error) {
+            note("album " + describe(error));
+          }
+        }
+      }
+
+      result.home = "ok " + sections.length + " 块" + (sheet ? " +专辑" : "");
       if (first) {
         result.track = String(first.id).slice(0, 24) + " " + String(first.name || "").slice(0, 40);
       } else {
