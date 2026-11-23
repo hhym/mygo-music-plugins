@@ -58,7 +58,7 @@
 | 11 | [爱上听书](plugins/kmbas/) | [kmbas.com](https://kmbas.com/) | `kmbas` | 0.1.0 | 能，同上，书号和集号前缀不同 |
 | 12 | [59听书](plugins/ting59/) | [59ting.com](https://59ting.com/) | `ting59` | 0.1.0 | 能，详情 `/ting/`，m4a 206 |
 | 13 | [三九听书](plugins/sanjiuwang/) | [sanjiuwang.com](https://sanjiuwang.com/) | `sanjiuwang` | 0.1.0 | 能，m4a 206 |
-| 14 | [瓜播听书](plugins/guabo/) | [guabo.net](https://guabo.net/) | `guabo` | 0.1.0 | 站点当前回 503，代码已就位，等恢复 |
+| 14 | [瓜播听书](plugins/guabo/) | [guabo.net](https://guabo.net/) | `guabo` | 0.1.0 | 206 可播（实测 m4a） |
 | 15 | [伊薇听书](plugins/eweizhi/) | [www.eweizhi.com](https://www.eweizhi.com/) | `eweizhi` | 0.1.0 | 站点当前 520（Cloudflare 源站错误） |
 | 16 | [一一听书](plugins/eyihu/) | [eyihu.com](https://eyihu.com/) | `eyihu` | 0.1.0 | 站点当前回 503 |
 | 17 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
