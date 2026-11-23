@@ -1,3 +1,4 @@
+// 显示名：275听书（i275）
 const CFG = {
   "name": "275听书",
   "base": "https://m.i275.com",

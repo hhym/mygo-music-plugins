@@ -1,3 +1,4 @@
+// 显示名：优折美音乐（uzz-music）
 // MyGo Music plugin — 优折美音乐 (m.uzz.me)
 //
 // The site is an MKOnlineMusicPlayer front end: one static shell page plus a

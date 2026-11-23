@@ -1,3 +1,4 @@
+// 显示名：凤梨音乐（flmp3-music）
 // MyGo Music plugin — 凤梨音乐 (www.flmp3.pro)
 //
 // A small Chinese music site: every page is plain HTML, no account, no cookie.

@@ -1,3 +1,4 @@
+// 显示名：广场舞地盘（gcwdp）
 // 广场舞地盘（www.gcwdp.com）MyGo Music 插件
 //
 // 站点是 DedeCMS 的老 PHP 站，整站 GB2312 编码，页面里全是同步渲染的 HTML，

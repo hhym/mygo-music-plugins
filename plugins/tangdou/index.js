@@ -1,3 +1,4 @@
+// 显示名：糖豆音乐（tangdou）
 const API = "https://api-h5.tangdou.com";
 const IMG = "https://aimg.tangdou.com";
 const WEB = "https://www.tangdou.com";

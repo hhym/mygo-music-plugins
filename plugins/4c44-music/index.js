@@ -1,3 +1,4 @@
+// 显示名：世纪音乐（4c44-music）
 // MyGo Music plugin — 世纪音乐网 (www.4c44.com)
 //
 // The site is a plain PHP music site:

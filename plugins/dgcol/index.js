@@ -1,3 +1,4 @@
+// 显示名：动感酷音乐（dgcol）
 // 动感酷音乐（dgcol.com）— MyGo Music 插件
 //
 // 站点是 PHP 服务端页面：每日热歌列表 /choicemsc/，歌曲页

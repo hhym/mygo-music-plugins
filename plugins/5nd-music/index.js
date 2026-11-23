@@ -1,3 +1,4 @@
+// 显示名：5nd音乐（5nd-music）
 // MyGo Music plugin — 5nd音乐 (www.5nd.com)
 //
 // The site is an ASP.NET music site. What the plugin uses:

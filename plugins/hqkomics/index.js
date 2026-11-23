@@ -1,3 +1,4 @@
+// 显示名：环球听书（hqkomics）
 const CFG = {
   id: "hqkomics",
   name: "环球听书",

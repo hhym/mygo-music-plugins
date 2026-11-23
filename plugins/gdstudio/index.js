@@ -1,3 +1,4 @@
+// 显示名：GD音乐台（gdstudio）
 // GD 音乐台（music.gdstudio.org）— MyGo Music 插件
 //
 // 站点前端是 SPA，插件直接使用它公开的聚合 API：

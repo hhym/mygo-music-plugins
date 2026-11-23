@@ -1,3 +1,4 @@
+// 显示名：36DJ舞曲（36dj-music）
 // MyGo Music plugin — 36DJ舞曲 (www.36dj.com)
 //
 // An old-style DJ site on EmpireCMS: list pages are plain HTML tables of links,

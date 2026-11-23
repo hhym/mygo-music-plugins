@@ -1,3 +1,4 @@
+// 显示名：汽车音乐网（carsmp3-music）
 // MyGo Music plugin — 汽车音乐网 (www.carsmp3.com)
 //
 // A Discuz! forum that hands out lossless car audio: every thread is one album

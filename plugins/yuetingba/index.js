@@ -1,3 +1,4 @@
+// 显示名：悦听吧（yuetingba）
 const CFG = {
   "name": "悦听吧",
   "base": "http://www.yuetingba.cn",

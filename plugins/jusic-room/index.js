@@ -1,3 +1,4 @@
+// 显示名：一起听歌吧（jusic-room）
 // MyGo Music plugin — 一起听歌吧 (happy.alang.run / Jusic-Serve-Houses)
 //
 // 这个站点不是曲库，是「一起听歌房」：前端只是房间界面，内容全部来自后端

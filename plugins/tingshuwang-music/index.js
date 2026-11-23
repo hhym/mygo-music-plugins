@@ -1,3 +1,4 @@
+// 显示名：听书网（tingshuwang-music）
 // MyGo Music plugin — 听书网 (www.tingshuwang.cc)
 //
 // An audio-book site: every book page is UTF-8 HTML, no account, no cookie, and

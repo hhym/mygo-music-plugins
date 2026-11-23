@@ -1,3 +1,4 @@
+// 显示名：米乐迪音乐（imelody）
 // 米乐迪音乐（imelody.top）— MyGo Music 插件
 //
 // 站点是 MelodyTimeline 华语乐坛编年史 SPA，数据由一个 JSON API 提供：

@@ -1,3 +1,4 @@
+// 显示名：VY音乐（yyvy）
 // VY音乐网（yyvy.cn）— MyGo Music 插件
 //
 // 站点是原创音乐社区。歌曲列表有 `/api/songs?page=N&order=...` 接口，

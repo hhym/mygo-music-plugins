@@ -1,3 +1,4 @@
+// 显示名：飞卢听书（faloo）
 const CFG = {
   "name": "飞卢听书",
   "base": "http://ts.faloo.com",

@@ -1,3 +1,4 @@
+// 显示名：单田芳评书网（pingshu5）
 const CFG = {
   "name": "单田芳评书网",
   "base": "http://www.pingshu5.net",

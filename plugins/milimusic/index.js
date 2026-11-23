@@ -1,3 +1,4 @@
+// 显示名：米粒音乐（milimusic）
 // 米粒音乐（www.milimusic.cn）— MyGo Music 插件
 //
 // 站点是 GB2312/GBK 编码的 PHP 页面，而 MyGo 运行时的 TextDecoder 只支持 UTF-8，

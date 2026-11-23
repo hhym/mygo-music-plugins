@@ -1,3 +1,4 @@
+// 显示名：好听轻音乐（htqyy）
 // 好听轻音乐网（htqyy.com）— MyGo Music 插件
 //
 // 站点是 ASP.NET 老站，列表是服务端渲染或 AJAX 返回的 /play/<id> 卡片，

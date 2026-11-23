@@ -1,3 +1,4 @@
+// 显示名：DJ024电音（dj024-music）
 // MyGo Music plugin — DJ024电音 (www.dj024.com)
 //
 // A Shenyang DJ site built on Laravel: list pages are plain HTML, and one

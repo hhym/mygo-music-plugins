@@ -1,3 +1,4 @@
+// 显示名：瓜播听书（guabo）
 const CFG = {
   id: "guabo",
   name: "瓜播听书",

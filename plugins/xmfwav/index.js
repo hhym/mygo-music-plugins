@@ -1,3 +1,4 @@
+// 显示名：小蜜蜂音乐（xmfwav）
 // 小蜜蜂音乐（xmfwav.com）— MyGo Music 插件
 //
 // 站点是 PHP 服务端页面：首页 /，最近更新 /newsong/，歌手列表 /hotsingers/，

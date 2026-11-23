@@ -1,3 +1,4 @@
+// 显示名：布谷音乐（buguyy-music）
 // MyGo Music plugin — 布谷音乐 (https://www.buguyy.top)
 //
 // 站点是个 Nuxt SPA，页面内容全部来自同域的 JSON 接口：

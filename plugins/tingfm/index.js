@@ -1,3 +1,4 @@
+// 显示名：听FM电台（tingfm）
 const CFG = {
   "name": "听FM电台",
   "base": "https://cn.tingfm.com",

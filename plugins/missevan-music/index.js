@@ -1,3 +1,4 @@
+// 显示名：猫耳FM（missevan-music）
 // MyGo Music plugin — 猫耳FM (www.missevan.com)
 //
 // A Chinese audio site (radio plays, drama episodes, music sheets) whose API is

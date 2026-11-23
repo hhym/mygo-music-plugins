@@ -1,3 +1,4 @@
+// 显示名：5sing（5sing）
 // 5sing 原创音乐基地（5sing.kugou.com）— MyGo Music 插件
 //
 // 站点没有公开文档的 API：列表页读服务端渲染的 HTML（首页推荐是一段内嵌 JSON），

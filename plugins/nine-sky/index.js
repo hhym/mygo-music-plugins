@@ -1,3 +1,4 @@
+// 显示名：九天音乐（nine-sky）
 // 九天音乐（9sky.com）插件
 // 站点是老的 server-rendered 页面：搜索走 new.9sky.com 的 h5 接口，单曲信息与音频地址
 // 藏在 /music?ids= 返回的 `var lists = formatSong([...])` 里，唱片页是 `var list = [...]`。
