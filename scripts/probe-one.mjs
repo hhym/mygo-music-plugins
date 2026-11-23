@@ -45,6 +45,7 @@ const result = {
 };
 
 const started = Date.now();
+let trackId = "";
 const note = (text) => {
   result.note = result.note ? result.note + "；" + text : text;
 };
@@ -94,7 +95,9 @@ try {
 
       result.home = "ok " + sections.length + " 块" + (sheet ? " +专辑" : "");
       if (first) {
-        result.track = String(first.id).slice(0, 24) + " " + String(first.name || "").slice(0, 40);
+        /* 显示用的 id 截断过，真正交给 stream 的必须是完整 id */
+        trackId = String(first.id);
+        result.track = trackId.slice(0, 24) + " " + String(first.name || "").slice(0, 40);
       } else {
         note("首页没有曲目");
       }
@@ -104,7 +107,7 @@ try {
     }
   }
 
-  const trackId = result.track ? result.track.split(" ")[0] : "";
+  /* trackId 由 home 段填好，不再从展示字符串里猜 */
   if (trackId && typeof plugin.stream === "function") {
     try {
       const stream = await plugin.stream({ id: trackId });

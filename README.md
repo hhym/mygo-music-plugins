@@ -23,11 +23,11 @@
 | 插件 | 目录 | 版本 |
 | --- | --- | --- |
 | [36DJ舞曲](plugins/36dj-music/) | `36dj-music` | 1.0.0 |
-| [飞卢听书](plugins/faloo/) | `faloo` | 0.1.0 |
-| [275听书](plugins/i275/) | `i275` | 0.1.0 |
-| [单田芳评书网](plugins/pingshu5/) | `pingshu5` | 0.1.0 |
-| [听FM电台](plugins/tingfm/) | `tingfm` | 0.1.0 |
-| [悦听吧](plugins/yuetingba/) | `yuetingba` | 0.1.3 |
+| [飞卢听书](plugins/faloo/) | `faloo` | 0.1.1 |
+| [275听书](plugins/i275/) | `i275` | 0.1.1 |
+| [单田芳评书网](plugins/pingshu5/) | `pingshu5` | 0.1.1 |
+| [听FM电台](plugins/tingfm/) | `tingfm` | 0.1.1 |
+| [悦听吧](plugins/yuetingba/) | `yuetingba` | 0.1.4 |
 | [闪闪音乐](plugins/33ve/) | `33ve` | 1.0.0 |
 | [世纪音乐](plugins/4c44-music/) | `4c44-music` | 1.1.0 |
 | [5nd音乐](plugins/5nd-music/) | `5nd-music` | 1.6.0 |
@@ -235,6 +235,7 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 | `./scripts/pack.sh --check` | 只比对，不动文件：解压 `dist/` 里的包读 `plugin.json`，版本与源码不符就报「过期」，缺包报「缺失」 |
 | `./scripts/locales.mjs` | 从 `index.js` 抓出所有 `t("…")` 原文，补 `locales/zh-CN.json`；`--check` 只报告谁还缺 |
 | `./scripts/probe.mjs` | 逐个插件跑 `home` → `stream` → 1 KB `Range` 验证，出一张表；`./scripts/probe.mjs <id>` 只探一个，`--json` 便于两次结果比对 |
+| `./scripts/gate.mjs` | 跑一遍探测并和 `docs/基线.json` 比：有插件从「可播」掉下来就退出码 1；`--update` 把这次结果收成新基线 |
 
 `dist/` 之前出过一次包落后于插件目录的情况（包里还是旧版本），`--check` 就是为这个加的门：CI 里跑一次，不一致会亮红。
 
@@ -256,3 +257,14 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 - `docs/探测基线-2026-11-23.md`：国内出口的第一次全量探测，29 个插件的可播 / 报错逐条解读，以后对比用；
 - `docs/受阻站点.md`：查了但验证不了的站（72DJ 被三个出口全拒、dju8 只有 wma），附本机复核命令。
+
+### 发版门槛
+
+`node scripts/gate.mjs` 是发版前的最后一步：它跑一遍全量探测，和 `docs/基线.json` 里记录的上一版对比。
+
+- 插件从「可播」掉到「坏」→ 退出码 1，列出来拦你；
+- 掉到「出口被拒」（403/503）→ 只提示、不拦，这是网络问题不是插件问题；
+- 新插件不在基线里 → 单独列一行提醒；
+- 确认退化可以接受（比如站点真下架了）再跑 `--update` 收进基线。
+
+基线是 `probe.mjs --json` 的原始输出，带时间戳，所以「什么时候、谁的版本、什么状态」都留得住。

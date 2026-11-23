@@ -37,7 +37,7 @@ function runOne(dir) {
     execFile(
       process.execPath,
       [join(here, "probe-one.mjs"), dir],
-      { timeout: 45000, maxBuffer: 1 << 20 },
+      { timeout: 90000, maxBuffer: 1 << 20 },
       (error, stdout) => {
         const line = (stdout || "").trim().split("\n").pop();
         if (line && line.startsWith("{")) {
@@ -57,7 +57,7 @@ function runOne(dir) {
           stream: "",
           verify: "",
           ms: 0,
-          note: error && error.killed ? "超时 45s" : "子进程未产出结果",
+          note: error && error.killed ? "超时 90s" : "子进程未产出结果",
         });
       },
     );

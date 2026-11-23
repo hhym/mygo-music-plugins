@@ -1,0 +1,330 @@
+{
+  "at": "2026-11-23T05:53:11.211Z",
+  "tally": {
+    "可播": 24,
+    "stream 报错": 1,
+    "未播放": 3,
+    "出口被拒": 1
+  },
+  "rows": [
+    {
+      "id": "33ve",
+      "name": "闪闪音乐",
+      "version": "1.0.0",
+      "home": "ok 5 块",
+      "track": "9e478e01993d6ada88eddf5b 거짓말 (谎言)",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 3327,
+      "note": ""
+    },
+    {
+      "id": "36dj-music",
+      "name": "36DJ舞曲",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "17589 动感节奏《一场相遇》沉醉烟嗓女声嗨曲串烧",
+      "stream": "m4a 31MB",
+      "verify": "206 audio/mp4 1024B",
+      "ms": 2012,
+      "note": ""
+    },
+    {
+      "id": "4c44-music",
+      "name": "世纪音乐",
+      "version": "1.1.0",
+      "home": "ok 4 块",
+      "track": "tmnwmdtedc 冬天又来临",
+      "stream": "m4a 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 1350,
+      "note": ""
+    },
+    {
+      "id": "5nd-music",
+      "name": "5nd音乐",
+      "version": "1.6.0",
+      "home": "ok 12 块",
+      "track": "590852 泡沫",
+      "stream": "失败",
+      "verify": "",
+      "ms": 768,
+      "note": "stream unavailable: 5nd 只放行浏览器，已在浏览器打开这首歌"
+    },
+    {
+      "id": "5sing",
+      "name": "5sing",
+      "version": "1.0.0",
+      "home": "ok 9 块",
+      "track": "yc:4424615 聘猫记",
+      "stream": "mp3 无size",
+      "verify": "206 application/octet-stream 1024B",
+      "ms": 983,
+      "note": ""
+    },
+    {
+      "id": "buguyy-music",
+      "name": "布谷音乐",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "MTEyNDM3OTE= 夜色(箫曲)",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 1851,
+      "note": ""
+    },
+    {
+      "id": "carsmp3-music",
+      "name": "汽车音乐网",
+      "version": "1.0.0",
+      "home": "ok 6 块 +专辑",
+      "track": "n26598946 山丘",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 9874,
+      "note": "首页只有专辑，取第 1 本的第一首"
+    },
+    {
+      "id": "dgcol",
+      "name": "动感酷音乐",
+      "version": "1.0.0",
+      "home": "ok 1 块",
+      "track": "",
+      "stream": "跳过",
+      "verify": "",
+      "ms": 22575,
+      "note": "首页没有曲目"
+    },
+    {
+      "id": "dj024-music",
+      "name": "DJ024电音",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "144648 【独家首发】Rumadai(DJ024 Remix)",
+      "stream": "m4a 2MB",
+      "verify": "206 audio/x-m4a 1024B",
+      "ms": 2667,
+      "note": ""
+    },
+    {
+      "id": "faloo",
+      "name": "飞卢听书",
+      "version": "0.1.0",
+      "home": "ok 1 块",
+      "track": "https://ts.faloo.com/lis 我的战舰能升级",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 844,
+      "note": ""
+    },
+    {
+      "id": "flmp3-music",
+      "name": "凤梨音乐",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "315288 宿命之外",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 8056,
+      "note": ""
+    },
+    {
+      "id": "gdstudio",
+      "name": "GD音乐台",
+      "version": "1.0.0",
+      "home": "ok 4 块",
+      "track": "netease:1973665667:19736 海屿你",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 7823,
+      "note": ""
+    },
+    {
+      "id": "htqyy",
+      "name": "好听轻音乐",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "1789 拾光暖意",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 460,
+      "note": ""
+    },
+    {
+      "id": "i275",
+      "name": "275听书",
+      "version": "0.1.0",
+      "home": "ok 1 块",
+      "track": "/book/58.html 剑来（上下部）",
+      "stream": "m4a 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 4945,
+      "note": ""
+    },
+    {
+      "id": "imelody",
+      "name": "米乐迪音乐",
+      "version": "1.0.0",
+      "home": "ok 4 块",
+      "track": "88aa6e8b-0194-423c-885c- Into the Mystic",
+      "stream": "flac 无size",
+      "verify": "206 audio/flac 1024B",
+      "ms": 7960,
+      "note": ""
+    },
+    {
+      "id": "jusic-room",
+      "name": "一起听歌吧",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "00476zUy2oLuhh 我爱你",
+      "stream": "mp3 无size",
+      "verify": "410  0B",
+      "ms": 2798,
+      "note": ""
+    },
+    {
+      "id": "milimusic",
+      "name": "米粒音乐",
+      "version": "1.0.0",
+      "home": "ok 2 块",
+      "track": "40015 岁月释然",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 38261,
+      "note": ""
+    },
+    {
+      "id": "missevan-music",
+      "name": "猫耳FM",
+      "version": "1.0.0",
+      "home": "ok 2 块 +专辑",
+      "track": "s133535 Braska - 赤璃琴殇",
+      "stream": "m4a 无size",
+      "verify": "206 application/octet-stream 1024B",
+      "ms": 1236,
+      "note": "首页只有专辑，取第 1 本的第一首"
+    },
+    {
+      "id": "mvmp3",
+      "name": "无名音乐",
+      "version": "1.0.0",
+      "home": "ok 5 块",
+      "track": "007a7a8eafa3ff9ea51ef6a7 茶花开了",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 2720,
+      "note": ""
+    },
+    {
+      "id": "nine-sky",
+      "name": "九天音乐",
+      "version": "1.0.1",
+      "home": "ok 3 块",
+      "track": "11112 末路狂花钱（电影《末路狂花钱》同名主题曲）",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 2474,
+      "note": ""
+    },
+    {
+      "id": "pingshu5",
+      "name": "单田芳评书网",
+      "version": "0.1.0",
+      "home": "ok 2 块",
+      "track": "qtfm-prog:478975:2728749 圆桌会|从单田芳的逆境人生学到的职场软实力【上】",
+      "stream": "m4a 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 2691,
+      "note": ""
+    },
+    {
+      "id": "ting55",
+      "name": "恋听网",
+      "version": "1.0.0",
+      "home": "ok 9 块 +专辑",
+      "track": "701-1 第1集",
+      "stream": "mp3 无size",
+      "verify": "503 text/plain 98B",
+      "ms": 1055,
+      "note": "首页只有专辑，取第 1 本的第一首"
+    },
+    {
+      "id": "tingfm",
+      "name": "听FM电台",
+      "version": "0.1.0",
+      "home": "ok 1 块",
+      "track": "https://tingfm.net/radio 广东股市广播",
+      "stream": "hls 无size",
+      "verify": "206 application/x-mpegurl 263B",
+      "ms": 3138,
+      "note": ""
+    },
+    {
+      "id": "tingshuwang-music",
+      "name": "听书网",
+      "version": "1.0.0",
+      "home": "ok 2 块 +专辑",
+      "track": "c:GuiBiZhiZhu:166140 第001-005集",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 12651,
+      "note": "首页只有专辑，取第 1 本的第一首"
+    },
+    {
+      "id": "tingting",
+      "name": "听听网",
+      "version": "1.0.1",
+      "home": "ok 5 块",
+      "track": "59324e6f61477433646e6834 慌啥子嘛 (赵本山版)",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 3286,
+      "note": ""
+    },
+    {
+      "id": "uzz-music",
+      "name": "优折美音乐",
+      "version": "1.0.0",
+      "home": "ok 3 块",
+      "track": "netease|1973665667|19736 海屿你",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 9893,
+      "note": ""
+    },
+    {
+      "id": "xmfwav",
+      "name": "小蜜蜂音乐",
+      "version": "1.0.1",
+      "home": "ok 1 块",
+      "track": "",
+      "stream": "跳过",
+      "verify": "",
+      "ms": 22899,
+      "note": "首页没有曲目"
+    },
+    {
+      "id": "yuetingba",
+      "name": "悦听吧",
+      "version": "0.1.3",
+      "home": "ok 2 块",
+      "track": "/book/detail/3a24b7ca-f1 超品相师(多人演播)",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 764,
+      "note": ""
+    },
+    {
+      "id": "yyvy",
+      "name": "VY音乐",
+      "version": "1.0.0",
+      "home": "ok 5 块",
+      "track": "1486 细碎桂瓣廊下",
+      "stream": "mp3 无size",
+      "verify": "206 audio/mpeg 1024B",
+      "ms": 956,
+      "note": ""
+    }
+  ]
+}

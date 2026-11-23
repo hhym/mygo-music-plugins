@@ -19,6 +19,7 @@ const DETAIL = CFG.detailRegex || CFG.detail || "NEVERMATCH";
 const QT_SEARCH = "https://search.qtfm.cn";
 const QT_API = "https://webapi.qtfm.cn";
 const QT_WEB = "https://m.qtfm.cn";
+const QT_HEAD = { "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile", origin: QT_WEB, referer: QT_WEB + "/", accept: "application/json,*/*" };
 
 const pageCache = new Map();
 const knownTracks = new Map();
@@ -134,13 +135,39 @@ async function qtPrograms(chid) {
   return (free.length ? free : list).sort((a, b) => Number(a.programId || 0) - Number(b.programId || 0));
 }
 async function qtProg(chid, pid, title = "") {
-  const res = await fetch(`${QT_WEB}/vchannels/${chid}/programs/${pid}/`, { headers: { "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile", referer: QT_WEB + "/" } });
+  /* 2026-11 起 m.qtfm.cn/vchannels/<chid>/programs/<pid>/ 变成了 SPA 空壳，
+     页面里不再有 audioUrl。音频地址改由 webapi 的 programInfo 给出，而且是
+     先回 302 再跳到带 auth_key 的签名 m4a；宿主不一定跟随 302，所以这里把
+     location 解出来，直接把最终地址交出去。 */
+  let res;
+  try {
+    res = await fetch(`${QT_API}/api/mobile/channels/${chid}/programs/${pid}`, { headers: QT_HEAD });
+  } catch (error) {
+    return null;
+  }
   if (!res.ok) return null;
-  const t = await res.text(); if (/用户未购买/.test(t)) return null;
-  const m = t.match(/"audioUrl":"(https?:\/\/[^"]+)"/); if (!m) return null;
-  const u = m[1].replace(/\\\//g, "/");
-  return { url: u, type: /\.m4a(?:$|\?)/.test(u) ? "m4a" : "mp3", headers: { referer: QT_WEB + "/", "user-agent": "Mozilla/5.0" }, title: clean(title) };
+  let body;
+  try {
+    body = await res.json();
+  } catch (error) {
+    return null;
+  }
+  const info = (body && body.programInfo) || {};
+  const raw = String(info.audioUrl || "").replace(/\\\//g, "/");
+  if (!raw) return null;
+
+  let url = raw;
+  try {
+    const head = await fetch(url, { headers: QT_HEAD, redirect: "manual" });
+    const loc = head.headers.get("location");
+    if (loc) url = new URL(loc, url).href;
+  } catch (error) {
+    /* 解不出 302 就交原地址，宿主若会跟随也能播 */
+  }
+
+  return { url: url, type: /\.m4a(?:$|\?)/i.test(url) ? "m4a" : "mp3", headers: { referer: QT_WEB + "/", "user-agent": "Mozilla/5.0" }, title: clean(title) };
 }
+
 async function qtChannelStream(chid, ep = 1) { const p = await qtPrograms(chid); if (!p.length) return null; const i = Math.min(Math.max(Number(ep) || 1, 1), p.length) - 1; return qtProg(chid, p[i].programId, p[i].title || ""); }
 async function qtByName(name, ep = 1) {
   const docs = await qtDocs(name);

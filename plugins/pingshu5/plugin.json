@@ -1,7 +1,7 @@
 {
   "id": "pingshu5",
   "name": "单田芳评书网",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
