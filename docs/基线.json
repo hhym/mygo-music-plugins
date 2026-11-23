@@ -1,7 +1,7 @@
 {
   "at": "2026-11-23T05:53:11.211Z",
   "tally": {
-    "可播": 24,
+    "可播": 25,
     "stream 报错": 1,
     "未播放": 3,
     "出口被拒": 1
@@ -324,6 +324,17 @@
       "stream": "mp3 无size",
       "verify": "206 audio/mpeg 1024B",
       "ms": 956,
+      "note": ""
+    },
+    {
+      "id": "gcwdp",
+      "name": "广场舞地盘",
+      "version": "1.0.0",
+      "home": "ok 6 块",
+      "track": "m:661237 飞天-原创 背面超长完整版",
+      "stream": "mp3 无size",
+      "verify": "206 application/octet-stream 1024B",
+      "ms": 977,
       "note": ""
     }
   ]

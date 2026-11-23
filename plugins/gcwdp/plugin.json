@@ -1,0 +1,42 @@
+{
+  "id": "gcwdp",
+  "name": "广场舞地盘",
+  "description": "广场舞地盘的舞曲库、最新舞曲、交谊舞曲与轻音乐，站内试听地址现取现播。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.gcwdp.com",
+      "3.gcwdp.com",
+      "imgs.gcwdp.com"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "最新舞曲",
+      "page": "mp3",
+      "icon": "music"
+    },
+    {
+      "title": "舞曲库",
+      "page": "wuquku"
+    },
+    {
+      "title": "交谊舞曲",
+      "page": "jiaoyiwu"
+    },
+    {
+      "title": "轻音乐",
+      "page": "qingyinyue"
+    },
+    {
+      "title": "免费舞曲",
+      "page": "mianfeimp3"
+    }
+  ]
+}

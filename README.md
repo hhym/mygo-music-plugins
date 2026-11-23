@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 31 个，每个站点一个目录。31 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 32 个，每个站点一个目录。32 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（31 个）
+## 插件列表（32 个）
 
-按类型分四组：音乐 20 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+按类型分四组：音乐 21 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
-### 音乐（20 个）
+### 音乐（21 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -32,6 +32,7 @@
 | 18 | [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | `buguyy-music` | 1.0.0 | 能，320kbps MP3 直链 |
 | 19 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
 | 20 | [糖豆音乐](plugins/tangdou/) | [www.tangdou.com/music](https://www.tangdou.com/music/) | `tangdou` | 0.1.0 | 能，MP3 直链；搜索为本地遍历匹配 |
+| 21 | [广场舞地盘](plugins/gcwdp/) | [www.gcwdp.com](https://www.gcwdp.com/) | `gcwdp` | 1.0.0 | 能，试听地址现取（auth_key 十来分钟过期），站点 GB2312 无 JSON 接口 |
 
 ### DJ音乐（2 个）
 
@@ -240,12 +241,12 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 
 ### locales 现状
 
-30 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 13 个带 `en.json`：
+32 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
 
-- 5 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网；
+- 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 17 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 16 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 
@@ -272,3 +273,7 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 ### 糖豆音乐（tangdou）
 
 `api-h5.tangdou.com` 的 `/pc/music/list` 分「舞曲推荐 type=1」「新歌速递 type=2」，每页 30 首；`/pc/music/play?id=` 返回歌名、作者、封面、歌词和 `mp3qiniu.tangdou.com` 的 MP3 直链。站点没有公开搜索接口，搜索改为并发遍历两类前 7 页做本地匹配。
+
+### 广场舞地盘（gcwdp）
+
+整站 DedeCMS、GB2312 编码，一条 JSON 接口都没有，插件自带一张 GB2312 码表：既解响应字节，也把搜索词编回 GB2312 —— 站内搜索按 GBK 字节比对标题，直接发 UTF-8 永远是 0 条（`广场舞` 本身还是站点的搜索停用词，搜它固定 0 条，别的词正常）。列表页两套模板（`title-text` 和纯文字 `doc-tit`），解析以标题元素为锚点往前找链接和封面，两套都能吃。试听走详情页那个 iframe 的 `/plus/shiting_new.php?id=`，`<audio src="https://3.gcwdp.com/shiting/st-….mp3?auth_key=…">` 裸请求 206、能 Range；这条地址只认文章页本身作 Referer，且 auth_key 十来分钟过期，所以现取现播、只缓存两分钟。下载是收费的（`/plus/hidden.php` 按订单号解锁），插件不碰；站内也无歌词。
