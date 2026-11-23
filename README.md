@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 30 个，每个站点一个目录。29 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 30 个，每个站点一个目录。30 个都带 `locales/zh-CN.json`，其中 13 个另有 `en.json`（5 个真翻译、8 个占位），详见下文「locales 现状」。
 
 ## 插件列表（30 个）
 
-按加入的先后排列，和 git 提交顺序对得上：最早那批 9 个，之后 2026-11-22 一天内补了 11、4、5 三批。36DJ舞曲是最后补做的，按最初名单的位次留在第 9。
+按类型分四组：音乐 19 个、DJ音乐 2 个、听书 8 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
-### 最初名单（9 个）
+### 音乐（19 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -16,54 +16,47 @@
 | 2 | [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | `5nd-music` | 1.6.0 | 只认浏览器：UA、Cookie、http/https 都试过，音频域名一律 302 到 127.0.0.1，默认自动跳浏览器 |
 | 3 | [凤梨音乐](plugins/flmp3-music/) | [www.flmp3.pro](https://www.flmp3.pro/) | `flmp3-music` | 1.0.0 | 能，站点自己不放流，地址指向酷我 CDN |
 | 4 | [优折美音乐](plugins/uzz-music/) | [m.uzz.me](https://m.uzz.me/) | `uzz-music` | 1.0.0 | 能，走网易云同名直链（早先记录的「CloudFront 拦截」已不成立，2026-11-23 更正） |
-| 5 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
-| 6 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | `carsmp3-music` | 1.0.0 | 目录能看，试听走网易云同名匹配 |
-| 7 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.0.0 | 音单能，单曲是 Widevine 加密 HLS |
-| 8 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
-| 9 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
+| 5 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | `carsmp3-music` | 1.0.0 | 目录能看，试听走网易云同名匹配 |
+| 6 | [闪闪音乐](plugins/33ve/) | [www.33ve.com](https://www.33ve.com/) | `33ve` | 1.0.0 | 能，MP3 + LRC |
+| 7 | [5sing](plugins/5sing/) | [5sing.kugou.com](https://5sing.kugou.com/) | `5sing` | 1.0.0 | 能，原创 / 翻唱 / 伴奏 |
+| 8 | [动感酷音乐](plugins/dgcol/) | [www.dgcol.com](https://www.dgcol.com/) | `dgcol` | 1.0.0 | 能，但首页只有榜单、没有直挂曲目，自动探测取不到 id |
+| 9 | [GD音乐台](plugins/gdstudio/) | [music.gdstudio.org](https://music.gdstudio.org/) | `gdstudio` | 1.0.0 | 能，公开聚合 API |
+| 10 | [好听轻音乐](plugins/htqyy/) | [www.htqyy.com](http://www.htqyy.com/) | `htqyy` | 1.0.0 | 能，轻音乐 MP3 |
+| 11 | [米乐迪音乐](plugins/imelody/) | [imelody.top](https://imelody.top/) | `imelody` | 1.0.0 | 能，FLAC / MP3 |
+| 12 | [米粒音乐](plugins/milimusic/) | [www.milimusic.cn](http://www.milimusic.cn/) | `milimusic` | 1.0.0 | 播放走网易云同名匹配，首页串行抓页，自检约 40 秒 |
+| 13 | [无名音乐](plugins/mvmp3/) | [www.mvmp3.com](https://www.mvmp3.com/) | `mvmp3` | 1.0.0 | 能，MP3 + LRC |
+| 14 | [小蜜蜂音乐](plugins/xmfwav/) | [www.xmfwav.com](https://www.xmfwav.com/) | `xmfwav` | 1.0.1 | 能，优先网易云 MP3，首页是榜单式布局 |
+| 15 | [VY音乐](plugins/yyvy/) | [www.yyvy.cn](https://www.yyvy.cn/) | `yyvy` | 1.0.0 | 能，原创与榜单 |
+| 16 | [听听网](plugins/tingting/) | [www.ttw.cx](https://www.ttw.cx/) | `tingting` | 1.0.1 | 能，绕过 PHP session 校验，借酷我直链 |
+| 17 | [九天音乐](plugins/nine-sky/) | [www.9sky.com](https://www.9sky.com/) | `nine-sky` | 1.0.1 | 能，MP3 + 批量封面 |
+| 18 | [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | `buguyy-music` | 1.0.0 | 能，320kbps MP3 直链 |
+| 19 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
 
-### 第二批（11 个，2026-11-22）
-
-| # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
-| --- | --- | --- | --- | --- | --- |
-| 10 | [闪闪音乐](plugins/33ve/) | [www.33ve.com](https://www.33ve.com/) | `33ve` | 1.0.0 | 能，MP3 + LRC |
-| 11 | [5sing](plugins/5sing/) | [5sing.kugou.com](https://5sing.kugou.com/) | `5sing` | 1.0.0 | 能，原创 / 翻唱 / 伴奏 |
-| 12 | [动感酷音乐](plugins/dgcol/) | [www.dgcol.com](https://www.dgcol.com/) | `dgcol` | 1.0.0 | 能，但首页只有榜单、没有直挂曲目，自动探测取不到 id |
-| 13 | [GD音乐台](plugins/gdstudio/) | [music.gdstudio.org](https://music.gdstudio.org/) | `gdstudio` | 1.0.0 | 能，公开聚合 API |
-| 14 | [好听轻音乐](plugins/htqyy/) | [www.htqyy.com](http://www.htqyy.com/) | `htqyy` | 1.0.0 | 能，轻音乐 MP3 |
-| 15 | [米乐迪音乐](plugins/imelody/) | [imelody.top](https://imelody.top/) | `imelody` | 1.0.0 | 能，FLAC / MP3 |
-| 16 | [米粒音乐](plugins/milimusic/) | [www.milimusic.cn](http://www.milimusic.cn/) | `milimusic` | 1.0.0 | 播放走网易云同名匹配，首页串行抓页，自检约 40 秒 |
-| 17 | [无名音乐](plugins/mvmp3/) | [www.mvmp3.com](https://www.mvmp3.com/) | `mvmp3` | 1.0.0 | 能，MP3 + LRC |
-| 18 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
-| 19 | [小蜜蜂音乐](plugins/xmfwav/) | [www.xmfwav.com](https://www.xmfwav.com/) | `xmfwav` | 1.0.1 | 能，优先网易云 MP3，首页是榜单式布局 |
-| 20 | [VY音乐](plugins/yyvy/) | [www.yyvy.cn](https://www.yyvy.cn/) | `yyvy` | 1.0.0 | 能，原创与榜单 |
-
-### 第三批（4 个，2026-11-22）
+### DJ音乐（2 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
-| 21 | [听听网](plugins/tingting/) | [www.ttw.cx](https://www.ttw.cx/) | `tingting` | 1.0.1 | 能，绕过 PHP session 校验，借酷我直链 |
-| 22 | [九天音乐](plugins/nine-sky/) | [www.9sky.com](https://www.9sky.com/) | `nine-sky` | 1.0.1 | 能，MP3 + 批量封面 |
-| 23 | [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | `buguyy-music` | 1.0.0 | 能，320kbps MP3 直链 |
-| 24 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
+| 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
+| 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
 
-### 第四批（5 个，2026-11-22，听书与电台）
+### 听书（8 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
-| 25 | [飞卢听书](plugins/faloo/) | [ts.faloo.com](http://ts.faloo.com) | `faloo` | 0.1.1 | 能，源站 MP3 直链，解析失败回退蜻蜓 FM |
-| 26 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
-| 27 | [单田芳评书网](plugins/pingshu5/) | [www.pingshu5.net](http://www.pingshu5.net) | `pingshu5` | 0.1.1 | 能，源音频是微信语音、易失效，走蜻蜓 FM 兜底 |
-| 28 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
-| 29 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
+| 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.0.0 | 音单能，单曲是 Widevine 加密 HLS |
+| 2 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
+| 3 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
+| 4 | [飞卢听书](plugins/faloo/) | [ts.faloo.com](http://ts.faloo.com) | `faloo` | 0.1.1 | 能，源站 MP3 直链，解析失败回退蜻蜓 FM |
+| 5 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
+| 6 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
+| 7 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
+| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.1.1 | 能，播放页 `var now` 取 m4a；站点回源 503 频繁，插件双域名并发重试 |
 
-### 第五批（1 个，2026-11-23）
+### 评书（1 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
-| 30 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.1.1 | 能，播放页 `var now` 取 m4a；站点回源 503 频繁，插件双域名并发重试 |
-
-版本号直接取自各插件的 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+| 1 | [单田芳评书网](plugins/pingshu5/) | [www.pingshu5.net](http://www.pingshu5.net) | `pingshu5` | 0.1.1 | 能，源音频是微信语音、易失效，走蜻蜓 FM 兜底 |
 
 ## 安装
 
@@ -79,7 +72,9 @@
 - [Releases](https://github.com/hhym/mygo-music-plugins/releases/latest)：每个插件一个 zip，文件名是 `id-版本.zip`，例如 `5nd-music-1.6.0.zip`（纯 ASCII，不会因中文名下载乱码）；
 - 仓库内 `dist/` 目录：中文显示名命名的同名包，不带版本号，随 main 分支更新。
 
-## 各插件说明
+## 音乐
+
+普通歌曲站：榜单、歌单、歌手、专辑、搜索与歌词。
 
 ### 世纪音乐（4c44-music）
 
@@ -97,21 +92,9 @@
 
 页面、搜索、歌单结构都解析完了，但站点的 `api.php` 由 CloudFront 前置，对非浏览器来源直接 403，源站也不可达。插件如实返回「站点侧故障」，等站点恢复后不用改代码。
 
-### DJ024电音（dj024-music）
-
-沈阳 DJ024 电音传媒，DJ 舞曲、串烧、现场。`/api/tracks/media` 给 JSON，音频在 `dns.dj024.vip` 的 m4a，`Range` 回 206 能拖进度。非独家内容是完整版，独家只给片段。
-
 ### 汽车音乐网（carsmp3-music）
 
 Discuz! 论坛，GBK 编码，帖子当专辑、附件要回复才能下载，所以插件只做目录浏览，试听借 i-meto / injahow 的公开接口去网易云匹配同名曲。
-
-### 猫耳FM（missevan-music）
-
-广播剧、音乐音单、声音搜索。音单接口 `/sound/soundalllist` 里的 `soundurl` 是明文 m4a，能播；单曲接口 `/sound/getsound` 给的是 Widevine 加密 HLS，插件不去绕 DRM，从搜索结果直接点会提示加密。
-
-### 听书网（tingshuwang-music）
-
-有声小说站，书 = 专辑、章节 = 曲目。章节页的 `chapter_data.videourl` 是明文直链（m4a，或五集合一的 mp3），不带 UA、不带 Referer 也能取，`Range` 回 206。站点自带的 `/e/search` 对游客一律返回「没有搜索到相关的内容」，所以插件用 `/sitemap.html` 和 35 页书籍列表自建搜索索引，落在 `host.storage` 里缓存一小时，进首页时后台预热。
 
 ### 闪闪音乐（33ve）
 
@@ -145,10 +128,6 @@ Discuz! 论坛，GBK 编码，帖子当专辑、附件要回复才能下载，�
 
 榜单、歌单、歌手、专辑、搜索，在线试听 MP3 并显示 LRC 歌词。
 
-### 恋听网（ting55）
-
-有声小说站，书 = 专辑、集 = 曲目。章节页读取一次性 token 调 `POST /nlinka` 换 `pp.ting55.com` 的 MP3，失败时走移动版 `/glink` 兜底。
-
 ### 小蜜蜂音乐（xmfwav）
 
 新歌、热门排行、歌手作品、搜索、歌词；播放优先匹配网易云 MP3，避免站内 Ogg 试听在部分播放器上无法出声。
@@ -173,6 +152,34 @@ Nuxt SPA，只有 `hotlist` / `newlist` / `search` / `geturl` 四条公开接口
 
 Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全走 SockJS + STOMP，插件用 xhr 轮询实现匿名进房。只读跟随：正在播放与待播队列带服务端签好的直链，能播；搜索只有元数据（直链只在点歌入队那一刻签出来），所以搜索条目标为不可播，插件从不发 `/music/pick`，不往房间投歌。
 
+## DJ音乐
+
+舞曲、串烧、电音现场。
+
+### DJ024电音（dj024-music）
+
+沈阳 DJ024 电音传媒，DJ 舞曲、串烧、现场。`/api/tracks/media` 给 JSON，音频在 `dns.dj024.vip` 的 m4a，`Range` 回 206 能拖进度。非独家内容是完整版，独家只给片段。
+
+### 36DJ舞曲（36dj-music）
+
+帝国CMS 老站，DJ 舞曲、串烧与车载大碟，中文 / 英文 / 慢摇五类分类加人气榜。详情页 `var info = { "playurl": "2026/3611/16eva/36dj_17590.m4a" }` 给出路径，音频在 `tn2.72djapp.cn`；**裸地址一律 403，必须带 `?vsid=` 令牌**，令牌来自 `/js/lb/a.js`（`var vsid = '…'` + `var vsidExpire = <unix 秒>`），约十分钟一换。插件每次播放重新取令牌，令牌刚生成 90 秒内直接用，探测回 403 就强制重取；带令牌即 206 + `audio/mp4`，能拖进度。搜索是帝国CMS 原生 POST + `searchid` 翻页；下载页只有登录引导，不做。
+
+## 听书
+
+有声小说、广播剧、电台。
+
+### 猫耳FM（missevan-music）
+
+广播剧、音乐音单、声音搜索。音单接口 `/sound/soundalllist` 里的 `soundurl` 是明文 m4a，能播；单曲接口 `/sound/getsound` 给的是 Widevine 加密 HLS，插件不去绕 DRM，从搜索结果直接点会提示加密。
+
+### 听书网（tingshuwang-music）
+
+有声小说站，书 = 专辑、章节 = 曲目。章节页的 `chapter_data.videourl` 是明文直链（m4a，或五集合一的 mp3），不带 UA、不带 Referer 也能取，`Range` 回 206。站点自带的 `/e/search` 对游客一律返回「没有搜索到相关的内容」，所以插件用 `/sitemap.html` 和 35 页书籍列表自建搜索索引，落在 `host.storage` 里缓存一小时，进首页时后台预热。
+
+### 恋听网（ting55）
+
+有声小说站，书 = 专辑、集 = 曲目。章节页读取一次性 token 调 `POST /nlinka` 换 `pp.ting55.com` 的 MP3，失败时走移动版 `/glink` 兜底。
+
 ### 飞卢听书（faloo）
 
 GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直链；解析失败按书名回退蜻蜓 FM。
@@ -180,10 +187,6 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 ### 275听书（i275）
 
 移动端书库，首页与搜索可用；播放页会被服务端 302 回首页，音频回退蜻蜓 FM。
-
-### 单田芳评书网（pingshu5）
-
-`/pbook/<slug>.html` 书页与栏目页，源音频是微信语音直链，易失效，默认回退蜻蜓 FM。
 
 ### 听FM电台（tingfm）
 
@@ -193,9 +196,17 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 分类 `/book/<id>/1`、详情 `/book/detail/<uuid>/<page>`；搜索走站内 `/search?type=1&name=<q>&pageIndex=1`，「全部专辑」按 9 个分类合并去重、逐页翻完，全站 1002 本（快照见 `data/yuetingba-all-albums.json`）；支持 `album({id})` 读取整本专辑全部章节（每 200 集一页），例如《超品相师》2280 集、《庆余年》1865 集；单集播放调 `/api/app/docs-listen/<章节ID>/audio-url` 拿 MP3 直链，失败才回退蜻蜓。
 
-### 36DJ舞曲（36dj-music）
+### 85听书网（85ting）
 
-帝国CMS 老站，DJ 舞曲、串烧与车载大碟，中文 / 英文 / 慢摇五类分类加人气榜。详情页 `var info = { "playurl": "2026/3611/16eva/36dj_17590.m4a" }` 给出路径，音频在 `tn2.72djapp.cn`；**裸地址一律 403，必须带 `?vsid=` 令牌**，令牌来自 `/js/lb/a.js`（`var vsid = '…'` + `var vsidExpire = <unix 秒>`），约十分钟一换。插件每次播放重新取令牌，令牌刚生成 90 秒内直接用，探测回 403 就强制重取；带令牌即 206 + `audio/mp4`，能拖进度。搜索是帝国CMS 原生 POST + `searchid` 翻页；下载页只有登录引导，不做。
+首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集 m4a 直链。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
+
+## 评书
+
+传统评书，单一站点。
+
+### 单田芳评书网（pingshu5）
+
+`/pbook/<slug>.html` 书页与栏目页，源音频是微信语音直链，易失效，默认回退蜻蜓 FM。
 
 ## 目录
 
@@ -228,12 +239,12 @@ release/          打包好的 zip，id-版本 命名（ASCII，发 Releases 用
 
 ### locales 现状
 
-29 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 13 个带 `en.json`：
+30 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 13 个带 `en.json`：
 
 - 5 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 16 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 17 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 
