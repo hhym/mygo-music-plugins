@@ -1,0 +1,56 @@
+name: 插件回归探测
+
+# 每周一早上（北京时间 09:00）自动跑一遍，也可手动触发。
+# 目的不是“判插件死刑”，而是把“站点改版导致静默失效”变成一张看得见的表。
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 逐个插件跑 home → stream → Range 验证
+        continue-on-error: true
+        run: node scripts/probe.mjs | tee probe-report.md
+
+      - name: 检查 dist/ 与 plugins/ 是否一致
+        continue-on-error: true
+        run: ./scripts/pack.sh --check | tee pack-check.md
+
+      - name: 写入 Job Summary
+        if: always()
+        run: |
+          {
+            echo "## 插件回归探测"
+            echo
+            echo "> 探测出口是 GitHub 海外 runner：国内站点回 403 / 503 属预期，不代表插件失效。"
+            echo "> 真正的基线请在用户自己的国内机器上跑同一脚本。"
+            echo
+            cat probe-report.md 2>/dev/null || echo "（没有报告）"
+            echo
+            echo "## 打包一致性"
+            echo
+            cat pack-check.md 2>/dev/null || echo "（没有结果）"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-report
+          path: |
+            probe-report.md
+            pack-check.md
+          retention-days: 60

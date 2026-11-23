@@ -1,0 +1,52 @@
+name: 站点侦察
+
+# 本机/云主机出口被站点拦（403、503、超时）时，用海外 runner 抓一次原始页面，
+# 只看结构、不改插件。抓下来的页面进 artifact，方便离线解析字段。
+#
+# 典型用途：验证某个站的详情页到底怎么写音频地址、列表页行是什么形状。
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "要抓的完整地址（含 https://）"
+        required: true
+      referer:
+        description: "Referer，可空"
+        required: false
+        default: ""
+      user_agent:
+        description: "User-Agent"
+        required: false
+        default: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+
+permissions:
+  contents: read
+
+jobs:
+  scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 抓取
+        env:
+          URL: ${{ inputs.url }}
+          REF: ${{ inputs.referer }}
+          UA: ${{ inputs.user_agent }}
+        run: |
+          set -o pipefail
+          code=$(curl -sSL --max-time 40 -A "$UA" ${REF:+-e "$REF"} -o page.out -w "%{http_code} %{size_download} %{content_type}" "$URL") || code="curl 失败"
+          echo "结果: $code"
+          echo "字节: $(wc -c < page.out 2>/dev/null || echo 0)"
+          echo "--- 前 120 字节 ---"
+          head -c 120 page.out 2>/dev/null || true
+          echo
+          echo "--- 头部片段（0-3000 字符）---"
+          head -c 3000 page.out 2>/dev/null || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scout-page
+          path: page.out
+          retention-days: 7

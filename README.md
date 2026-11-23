@@ -223,3 +223,31 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 ### 36DJ舞曲（36dj-music）
 
 帝国CMS 老站，DJ 舞曲、串烧与车载大碟，中文 / 英文 / 慢摇五类分类加人气榜。详情页 `var info = { "playurl": "2026/3611/16eva/36dj_17590.m4a" }` 给出路径，音频在 `tn2.72djapp.cn`；**裸地址一律 403，必须带 `?vsid=` 令牌**，令牌来自 `/js/lb/a.js`（`var vsid = '…'` + `var vsidExpire = <unix 秒>`），约十分钟一换。插件每次播放重新取令牌，令牌刚生成 90 秒内直接用，探测回 403 就强制重取；带令牌即 206 + `audio/mp4`，能拖进度。搜索是帝国CMS 原生 POST + `searchid` 翻页；下载页只有登录引导，不做。
+
+## 仓库维护
+
+三个脚本，加上两个 GitHub Actions，维护这套插件不用再手工打包和手工翻页核对。
+
+| 脚本 | 作用 |
+| --- | --- |
+| `./scripts/pack.sh` | 从 `plugin.json` 读 id / 显示名 / 版本，统一产出 `dist/<显示名>-mygo插件.zip` 与 `release/<id>-<版本>.zip`，`locales/` 有就一起打进去 |
+| `./scripts/pack.sh <id>` | 只重打一个插件，例如 `./scripts/pack.sh 36dj-music` |
+| `./scripts/pack.sh --check` | 只比对，不动文件：解压 `dist/` 里的包读 `plugin.json`，版本与源码不符就报「过期」，缺包报「缺失」 |
+| `./scripts/locales.mjs` | 从 `index.js` 抓出所有 `t("…")` 原文，补 `locales/zh-CN.json`；`--check` 只报告谁还缺 |
+| `./scripts/probe.mjs` | 逐个插件跑 `home` → `stream` → 1 KB `Range` 验证，出一张表；`./scripts/probe.mjs <id>` 只探一个，`--json` 便于两次结果比对 |
+
+`dist/` 之前出过一次包落后于插件目录的情况（包里还是旧版本），`--check` 就是为这个加的门：CI 里跑一次，不一致会亮红。
+
+### locales 现状
+
+29 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 13 个带 `en.json`：
+
+- 5 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网；
+- 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
+
+剩下 16 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+
+### 定时探测
+
+- `.github/workflows/probe.yml`：每周一 09:00（北京时间）跑一遍 `probe.mjs` 和 `pack.sh --check`，结果写进 Job Summary 并留 artifact。**注意 runner 在海外**，国内站点回 403 / 503 属预期，不能当插件失效的判据；真正的基线在自己的国内机器上跑同一脚本。
+- `.github/workflows/scout.yml`：手动触发，填一个 URL，用海外出口抓回原始页面（附 Referer / UA），页面进 artifact。适合本机出口被站点拦住（403、503）时，先看清对方页面结构再改插件。
