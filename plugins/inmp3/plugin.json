@@ -1,0 +1,63 @@
+{
+  "id": "inmp3",
+  "name": "IN音乐网",
+  "description": "IN音乐网（inmp3.com）的热门歌曲、分类榜单、搜索与在线试听。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "inmp3.com",
+      "www.inmp3.com",
+      "*.inmp3.com",
+      "img1.kuwo.cn",
+      "img2.kuwo.cn",
+      "img3.kuwo.cn",
+      "*.kuwo.cn",
+      "*.migu.cn",
+      "*.qq.com",
+      "*.126.net",
+      "*.bcebos.com",
+      "*.aliyuncs.com",
+      "*.myqcloud.com",
+      "*.guoguo.org.cn",
+      "*.liyuncss.guoguo.org.cn"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/usr/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/opt/homebrew/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "localCache",
+      "label": "本地缓存播放",
+      "help": "默认直接播放远程地址。填 1 改为用本机 ffmpeg 缓存到本地，适合源站要求 Referer 或中文路径。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找。"
+    }
+  ]
+}

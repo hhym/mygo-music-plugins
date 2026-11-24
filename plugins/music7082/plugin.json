@@ -1,0 +1,60 @@
+{
+  "id": "music7082",
+  "name": "7082音乐网",
+  "description": "7082音乐网（www.7082.cn）的原创音乐、分类、排行榜、搜索与 MP3 在线播放。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "7082.cn",
+      "www.7082.cn",
+      "*.7082.cn",
+      "*.kuwo.cn",
+      "*.migu.cn",
+      "*.qq.com",
+      "*.126.net",
+      "*.bcebos.com",
+      "*.aliyuncs.com",
+      "*.myqcloud.com",
+      "*.guoguo.org.cn",
+      "*.liyuncss.guoguo.org.cn"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/usr/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/opt/homebrew/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "localCache",
+      "label": "本地缓存播放",
+      "help": "默认直接播放远程地址。填 1 改为用本机 ffmpeg 缓存到本地，适合源站要求 Referer 或中文路径。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找。"
+    }
+  ]
+}

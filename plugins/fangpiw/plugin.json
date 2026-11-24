@@ -1,0 +1,61 @@
+{
+  "id": "fangpiw",
+  "name": "放屁网",
+  "description": "放屁网（fangpiw.com）的热门珍藏、搜索与 MP3 试听片段。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "fangpiw.com",
+      "www.fangpiw.com",
+      "*.fangpiw.com",
+      "bkimg.cdn.bcebos.com",
+      "*.bcebos.com",
+      "*.kuwo.cn",
+      "*.migu.cn",
+      "*.qq.com",
+      "*.126.net",
+      "*.aliyuncs.com",
+      "*.myqcloud.com",
+      "*.guoguo.org.cn",
+      "*.liyuncss.guoguo.org.cn"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/usr/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/opt/homebrew/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "localCache",
+      "label": "本地缓存播放",
+      "help": "默认直接播放远程地址。填 1 改为用本机 ffmpeg 缓存到本地，适合源站要求 Referer 或中文路径。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找。"
+    }
+  ]
+}

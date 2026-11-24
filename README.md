@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 44 个，每个站点一个目录。44 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 47 个，每个站点一个目录。47 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（44 个）
+## 插件列表（47 个）
 
-按类型分四组：音乐 21 个、DJ音乐 2 个、听书 20 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+按类型分四组：音乐 24 个、DJ音乐 2 个、听书 20 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），新加入的三个为 2026-11-24 单独实测。
 
-### 音乐（21 个）
+### 音乐（24 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -33,6 +33,9 @@
 | 19 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
 | 20 | [糖豆音乐](plugins/tangdou/) | [www.tangdou.com/music](https://www.tangdou.com/music/) | `tangdou` | 0.1.0 | 能，MP3 直链；搜索为本地遍历匹配 |
 | 21 | [广场舞地盘](plugins/gcwdp/) | [www.gcwdp.com](https://www.gcwdp.com/) | `gcwdp` | 1.0.0 | 能，试听地址现取（auth_key 十来分钟过期），站点 GB2312 无 JSON 接口 |
+| 22 | [IN音乐网](plugins/inmp3/) | [inmp3.com](https://inmp3.com/) | `inmp3` | 0.1.0 | 能，详情页 base64 解出酷我 MP3 直链，实测 4.3MB、Range 206 |
+| 23 | [放屁网](plugins/fangpiw/) | [www.fangpiw.com](https://www.fangpiw.com/) | `fangpiw` | 0.1.0 | 能出声，但播放接口给的是 `audition/` 试听片段（实测不足 1MB），不是整曲 |
+| 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |
 
 ### DJ音乐（2 个）
 
@@ -339,3 +342,15 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 ### 广场舞地盘（gcwdp）
 
 整站 DedeCMS、GB2312 编码，一条 JSON 接口都没有，插件自带一张 GB2312 码表：既解响应字节，也把搜索词编回 GB2312 —— 站内搜索按 GBK 字节比对标题，直接发 UTF-8 永远是 0 条（`广场舞` 本身还是站点的搜索停用词，搜它固定 0 条，别的词正常）。列表页两套模板（`title-text` 和纯文字 `doc-tit`），解析以标题元素为锚点往前找链接和封面，两套都能吃。试听走详情页那个 iframe 的 `/plus/shiting_new.php?id=`，`<audio src="https://3.gcwdp.com/shiting/st-….mp3?auth_key=…">` 裸请求 206、能 Range；这条地址只认文章页本身作 Referer，且 auth_key 十来分钟过期，所以现取现播、只缓存两分钟。下载是收费的（`/plus/hidden.php` 按订单号解锁），插件不碰；站内也无歌词。
+
+### IN音乐网（inmp3）
+
+站点：https://inmp3.com。页面结构和 Hi歌曲（higequ.com）同源，首页热门搜索、新歌榜，分类为飙升榜 / 新歌榜 / 热歌榜 / 粤语 / 经典老歌；搜索 `/so/<关键词>/1/`，详情 `/song/<id>/`。音频地址在详情页底部以 base64 的 `encodedUrl` 给出，插件解码后得到 `kw-er.kuwo.cn` 的 MP3 直链，实测 4.3MB、`Range` 206。无需账号，站点当前可用。
+
+### 放屁网（fangpiw）
+
+站点：https://www.fangpiw.com。首页 `/hot-music`，搜索 `/s/<关键词>`，详情 `/music/<id>`；详情页 `window.appData = JSON.parse('…')` 里有 `play_id`，插件再 `POST /member/common-play-url`（body `id=<play_id>&purpose=play`）换播放地址。**这个接口给的是 `fp20250213.oss-cn-guangzhou.aliyuncs.com/audition/music_<id>.mp3` 试听片段**，2026-11-24 实测 243–729KB、`Range` 206，能出声但只有几十秒；整曲需要站点账号或相应权限，插件不绕过。音频 OSS 对带 `fangpiw` Referer 的请求回 403，插件播放时只带 UA。源站偶发 503，插件对首页、详情和播放接口做了重试。
+
+### 7082音乐网（music7082）
+
+站点：https://www.7082.cn。首页最新上传 / 热门歌曲，分类 `/play/<slug>/1.html`，搜索 `/include/search.php?ac=play&key=<关键词>`，详情 `/play/<id>.html`。播放走 `POST /skin/xle_dj197/play.php`，body `id=<id>&type=<type>`，`type` 从详情页 `lei_play("id","type")` 提取；接口直接返回 `www.7082.cn/dance/…mp3`，实测 6MB、`Range` 206，不带 Referer 也能取。站点是传统 PHP 模板，没有 JSON 搜索接口，插件按 `play/<id>.html` 链接抓取。
