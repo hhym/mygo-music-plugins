@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 47 个，每个站点一个目录。47 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 48 个，每个站点一个目录。48 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（47 个）
+## 插件列表（48 个）
 
-按类型分四组：音乐 24 个、DJ音乐 2 个、听书 20 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），新加入的三个为 2026-11-24 单独实测。
+按类型分四组：音乐 25 个、DJ音乐 2 个、听书 20 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的四个为 2026-11-24 单独实测。
 
-### 音乐（24 个）
+### 音乐（25 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -36,6 +36,7 @@
 | 22 | [IN音乐网](plugins/inmp3/) | [inmp3.com](https://inmp3.com/) | `inmp3` | 0.1.0 | 能，详情页 base64 解出酷我 MP3 直链，实测 4.3MB、Range 206 |
 | 23 | [放屁网](plugins/fangpiw/) | [www.fangpiw.com](https://www.fangpiw.com/) | `fangpiw` | 0.1.0 | 能出声，但播放接口给的是 `audition/` 试听片段（实测不足 1MB），不是整曲 |
 | 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |
+| 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
 
 ### DJ音乐（2 个）
 
@@ -354,3 +355,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 ### 7082音乐网（music7082）
 
 站点：https://www.7082.cn。首页最新上传 / 热门歌曲，分类 `/play/<slug>/1.html`，搜索 `/include/search.php?ac=play&key=<关键词>`，详情 `/play/<id>.html`。播放走 `POST /skin/xle_dj197/play.php`，body `id=<id>&type=<type>`，`type` 从详情页 `lei_play("id","type")` 提取；接口直接返回 `www.7082.cn/dance/…mp3`，实测 6MB、`Range` 206，不带 Referer 也能取。站点是传统 PHP 模板，没有 JSON 搜索接口，插件按 `play/<id>.html` 链接抓取。
+
+### 无忧音乐网（ting05）
+
+站点：https://ting05.com。站名带「ting」，实际是音乐站。首页最新推荐 30 首，分类 `/category-<N>.html`、翻页 `/category-<N>_<page>.html`（最近更新 / 华语 / 日韩 / 欧美 / DJ / 合集），搜索 `/search.php?q=<关键词>`，详情 `/song/<id>.html`。音频地址在详情页 APlayer 的 `url:`，多为 m4a，仓库探测脚本直接取远程地址得到 `206 audio/x-m4a`。站点 CDN 对中文路径敏感，插件默认用本机 ffmpeg 拉取并缓存成本地 m4a 再交给播放器，设置里填 `0` 可关闭缓存；找不到 ffmpeg、且音频本身是 m4a / mp3 / aac 时回退远程地址。

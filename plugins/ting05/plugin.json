@@ -1,0 +1,54 @@
+{
+  "id": "ting05",
+  "name": "无忧音乐网",
+  "description": "无忧音乐网（ting05.com）的音乐首页、分类、搜索、歌曲详情与 m4a 在线播放。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "ting05.com",
+      "www.ting05.com",
+      "*.ting05.com",
+      "*.guoguo.org.cn",
+      "cdn.m3u8.liyuncss.guoguo.org.cn",
+      "cloud.guoguo.org.cn"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/usr/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/opt/homebrew/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "localCache",
+      "label": "本地缓存播放",
+      "help": "音频 CDN 对中文路径敏感，默认先用本机 ffmpeg 拉取并缓存为本地 m4a。填 0 改为直接返回远程地址。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找。"
+    }
+  ]
+}
