@@ -1,0 +1,53 @@
+{
+  "id": "ting99",
+  "name": "99听书网",
+  "description": "99听书网（ting99.com）的有声小说、分类、搜索、专辑与章节播放。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "ting99.com",
+      "www.ting99.com",
+      "aod.cos.tx.xmcdn.com",
+      "audio.xmcdn.com",
+      "*.xmcdn.com"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/opt/homebrew/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/usr/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "transcode",
+      "label": "转码播放",
+      "help": "部分音频为 HE-AAC，默认用本机 ffmpeg 转 AAC-LC。填 0 关闭。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找。"
+    }
+  ]
+}

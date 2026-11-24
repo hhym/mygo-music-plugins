@@ -1,0 +1,56 @@
+{
+  "id": "qmtsw",
+  "name": "我听评书网",
+  "description": "我听评书网（qmtsw.com）的评书分类、搜索、专辑章节与在线播放。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.qmtsw.com",
+      "qmtsw.com",
+      "*.xmcdn.com",
+      "aod.cos.tx.xmcdn.com",
+      "audio.xmcdn.com",
+      "img.21lizhi.com"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "/opt/homebrew/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/usr/bin/ffmpeg",
+      "/snap/bin/ffmpeg",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
+  ],
+  "settings": [
+    {
+      "key": "transcode",
+      "label": "转码播放",
+      "help": "站点音频多为喜马拉雅 HE-AAC，应用自身解不了；默认用本机 ffmpeg 转 AAC-LC。填 0 关闭。"
+    },
+    {
+      "key": "ffmpegPath",
+      "label": "ffmpeg 路径",
+      "help": "留空自动查找，找不到时填完整路径。",
+      "link": "https://ffmpeg.org/download.html"
+    }
+  ]
+}

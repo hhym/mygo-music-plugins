@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 48 个，每个站点一个目录。48 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 51 个，每个站点一个目录。51 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（48 个）
+## 插件列表（51 个）
 
-按类型分四组：音乐 25 个、DJ音乐 2 个、听书 20 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的四个为 2026-11-24 单独实测。
+按类型分四组：音乐 25 个、DJ音乐 2 个、听书 22 个、评书 2 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的七个为 2026-11-24 前后单独实测。
 
 ### 音乐（25 个）
 
@@ -45,7 +45,7 @@
 | 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
 | 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
 
-### 听书（20 个）
+### 听书（22 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -69,12 +69,15 @@
 | 18 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
 | 19 | [听友听书](plugins/tingyou/) | [www.tingyou.fm](https://www.tingyou.fm/listening) | `tingyou` | 0.1.0 | 206 可播（实测 mp3） |
 | 20 | [石头听书](plugins/shitou/) | [www.shitou.club](https://www.shitou.club/list/cls/10042.html) | `shitou` | 0.1.0 | 音频在 B 站，需本机 ffmpeg 重封装 |
+| 21 | [易听书网](plugins/yitingshu/) | [www.yitingshu.com](https://www.yitingshu.com/) | `yitingshu` | 0.1.0 | 首页/专辑可用，xmcdn m4a 直链已取得；当前云主机出口被 CDN 403 |
+| 22 | [99听书网](plugins/ting99/) | [www.ting99.com](https://www.ting99.com/) | `ting99` | 0.1.0 | 首页可用；专辑/播放页当前 520，源站恢复后可播 |
 
-### 评书（1 个）
+### 评书（2 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [单田芳评书网](plugins/pingshu5/) | [www.pingshu5.net](http://www.pingshu5.net) | `pingshu5` | 0.1.1 | 能，源音频是微信语音、易失效，走蜻蜓 FM 兜底 |
+| 2 | [我听评书网](plugins/qmtsw/) | [www.qmtsw.com](https://www.qmtsw.com/) | `qmtsw` | 0.1.0 | 当前源站 520；此前可解析 217 集专辑章节 |
 
 ## 安装
 
@@ -359,3 +362,15 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 ### 无忧音乐网（ting05）
 
 站点：https://ting05.com。站名带「ting」，实际是音乐站。首页最新推荐 30 首，分类 `/category-<N>.html`、翻页 `/category-<N>_<page>.html`（最近更新 / 华语 / 日韩 / 欧美 / DJ / 合集），搜索 `/search.php?q=<关键词>`，详情 `/song/<id>.html`。音频地址在详情页 APlayer 的 `url:`，多为 m4a，仓库探测脚本直接取远程地址得到 `206 audio/x-m4a`。站点 CDN 对中文路径敏感，插件默认用本机 ffmpeg 拉取并缓存成本地 m4a 再交给播放器，设置里填 `0` 可关闭缓存；找不到 ffmpeg、且音频本身是 m4a / mp3 / aac 时回退远程地址。
+
+### 易听书网（yitingshu）
+
+站点：https://www.yitingshu.com。首页最新推荐，分类 `/yi/<N>.html`（言情、武侠、悬疑、历史、军事、评书、相声小品、商业财经），搜索 `GET /search.php?searchword=<关键词>`，专辑 `/book/<id>.html`，章节 `/play/<id>-0-<index>.html`。音频是喜马拉雅 CDN 的 xmcdn m4a，多为 HE-AAC，插件默认用本机 ffmpeg 转 AAC-LC，设置 `transcode=0` 可关闭。2026-11-23 本机实测首页、详情、播放页均通过；2026-11-24 云主机复核时，xmcdn 对出口 IP 返回 `403 deny by rule engine`，属于 CDN 拦截。
+
+### 99听书网（ting99）
+
+站点：https://www.ting99.com。首页最新推荐，24 个分类 `/fenlei/<N>.html`，搜索 `POST /search.php` 的 `searchword`，专辑 `/book/<id>.html`，章节 `/play/<id>-0-<index>.html`。音频是 xmcdn m4a，部分 HE-AAC，默认 ffmpeg 转 AAC-LC。2026-11-23 实测播放页能取到 m4a 直链；2026-11-24 云主机复核时首页可用，专辑页与播放页被 Cloudflare 回 `520`，插件按 5 次退避重试。
+
+### 我听评书网（qmtsw）
+
+站点：https://www.qmtsw.com。首页最新推荐，分类 `/book/<N>.html`，专辑 `/show/<id>.html`，章节 `/play/<id>-...html`；播放页的 `var now = FonHen_JieMa("...")` 解码后得到音频，个别页直接是明文 `var now = "https://...m4a"`。站点音频多为喜马拉雅 HE-AAC，默认 ffmpeg 转 AAC-LC（含 `/snap/bin/ffmpeg`）。2026-11-23 实测可解析 217 集专辑的完整章节列表；2026-11-24 云主机复核时源站首页和详情都回 `520`，插件按 4 次退避重试。
