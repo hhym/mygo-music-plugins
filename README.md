@@ -70,7 +70,7 @@
 | 16 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
 | 17 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
 | 18 | [听友听书](plugins/tingyou/) | [www.tingyou.fm](https://www.tingyou.fm/listening) | `tingyou` | 0.1.0 | 206 可播（实测 mp3） |
-| 19 | [石头听书](plugins/shitou/) | [www.shitou.club](https://www.shitou.club/list/cls/10042.html) | `shitou` | 0.1.0 | 音频在 B 站，需本机 ffmpeg 重封装 |
+| 19 | [石头听书](plugins/shitou/) | [www.shitou.club](https://www.shitou.club/list/cls/10042.html) | `shitou` | 0.2.0 | 能，B 站 m4s 直连、边下边播（应用自己能解 fMP4 里的 AAC-LC）；本机有 ffmpeg 时先重封装到本地，拖动更顺 |
 | 20 | [易听书网](plugins/yitingshu/) | [www.yitingshu.com](https://www.yitingshu.com/) | `yitingshu` | 0.1.0 | 首页/专辑可用，xmcdn m4a 直链已取得；当前云主机出口被 CDN 403 |
 | 21 | [99听书网](plugins/ting99/) | [www.ting99.com](https://www.ting99.com/) | `ting99` | 0.1.0 | 首页可用；专辑/播放页当前 520，源站恢复后可播 |
 
@@ -272,7 +272,7 @@ Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全�
 
 ### 石头听书（shitou）
 
-站点：https://www.shitou.club/list/cls/10042.html。WordPress（Ripro 主题）的影视/有声书站群，**站点自己不放音频**：一本书是文章 `/p/<id>.html`，正文嵌 B 站播放器 iframe。列表 `/list/cls/<tid>.html`（分页 `?page=N`，`_2.html` 是 404）、卡片 `<a href="/p/<id>.html" title="书名">`、封面在 `i*.hdslb.com`、搜索走 WordPress 原生 `/?s=`。章节从 B 站 `x/web-interface/view?bvid=` 的 `pages` 来，一个 P 一集；播放取 `x/player/playurl?...&fnval=16` 的 `dash.audio`（AAC-LC `m4s`），再用本机 ffmpeg `-c:a copy` 重封装成 `.m4a` 放插件数据目录。B 站接口要带 `buvid3`（`x/frontend/finger/spi` 匿名取）和 `Referer: https://www.bilibili.com/`，否则 412；ffmpeg 读远程地址也得带 UA 与 Referer，否则 CDN 403。单集常常是几小时的合集，首次播放要先把整段落到本地，会等一两分钟。
+站点：https://www.shitou.club/list/cls/10042.html。WordPress（Ripro 主题）的影视/有声书站群，**站点自己不放音频**：一本书是文章 `/p/<id>.html`，正文嵌 B 站播放器 iframe。列表 `/list/cls/<tid>.html`（分页 `?page=N`，`_2.html` 是 404）、卡片 `<a href="/p/<id>.html" title="书名">`、封面在 `i*.hdslb.com`、搜索走 WordPress 原生 `/?s=`。章节从 B 站 `x/web-interface/view?bvid=` 的 `pages` 来，一个 P 一集；播放取 `x/player/playurl?...&fnval=16` 的 `dash.audio`（AAC-LC `m4s`），播放把这条 `m4s` 原样交给应用（fMP4 分片里的 AAC-LC 应用自己能解，边下边播、不用本机装 ffmpeg）；本机有 ffmpeg 时先 `-c:a copy` 重封装成 `.m4a` 放插件数据目录，换到可随手拖动的本地文件。插件为此申请了 `process` 权限（`ffmpeg`/`ffmpeg.exe` 及常见安装路径），没有 ffmpeg 也不影响播放。B 站接口要带 `buvid3`（`x/frontend/finger/spi` 匿名取）和 `Referer: https://www.bilibili.com/`，否则 412；ffmpeg 读远程地址也得带 UA 与 Referer，否则 CDN 403。单集常常是几小时的合集，首次播放要先把整段落到本地，会等一两分钟。
 
 ## 评书
 

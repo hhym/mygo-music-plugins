@@ -1,6 +1,7 @@
 // 显示名：石头听书（shitou）
 // 站点自己不放音频：每本书是一篇文章(/p/<id>.html)，正文里嵌一个 B 站播放器 iframe，
-// 音频要从 B 站 dash 取（m4s，AAC-LC），再用本机 ffmpeg 重封装成 .m4a 交给播放器。
+// 音频要从 B 站 dash 取（m4s，AAC-LC）：应用自己就能读这种分片，直接交给它边下边播；
+// 本机有 ffmpeg 时先重封装成 .m4a，拖动更快。
 const CFG = {
   id: "shitou",
   name: "石头听书",
@@ -355,20 +356,20 @@ export async function stream(args) {
   const src = await audioUrl(info.bvid, item.cid);
   const title = (trackBy(pid + ":" + pageNo) || {}).name || item.part || "";
 
-  /* 没有 spawn 能力的环境（探测脚本）直接给 B 站 dash 地址，能让宿主取到内容再说 */
-  if (typeof host.spawn !== "function") {
-    return { url: src, type: "m4a", headers: { "user-agent": UA, referer: BILI_REFERER }, title };
-  }
+  /* 应用读得懂 B 站的 m4s（fMP4 里的 AAC-LC），可以直接边下边播；本机有 ffmpeg 时
+     先重封装一份到本地，换到可拖动的文件。没有 ffmpeg、或插件没有运行程序的权限，
+     就别拦着——把 dash 地址原样交出去。 */
+  const direct = { url: src, type: "m4a", headers: { "user-agent": UA, referer: BILI_REFERER }, title };
+  if (typeof host.spawn !== "function") return direct;
 
   const path = fileFor(pid, pageNo);
+  const file = { url: toFileUrl(path), type: "m4a", headers: { "user-agent": UA, referer: BILI_REFERER }, title };
   try {
     await remux(src, path, true);
+    return file;
   } catch (e) {
-    try { await remux(src, path, false); } catch (e2) {
-      throw fail("setup", "B 站的音频是 m4s 分片，需要本机 ffmpeg 重封装成 m4a — " + ((e2 && e2.message) || "ffmpeg 调用失败"));
-    }
+    try { await remux(src, path, false); return file; } catch (e2) { return direct; }
   }
-  return { url: toFileUrl(path), type: "m4a", headers: { "user-agent": UA, referer: BILI_REFERER }, title };
 }
 
 export async function search(args) {

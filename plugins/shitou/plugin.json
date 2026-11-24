@@ -1,7 +1,7 @@
 {
   "id": "shitou",
   "name": "石头听书",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -12,11 +12,29 @@
       "*.hdslb.com",
       "api.bilibili.com",
       "*.bilivideo.com"
+    ],
+    "process": [
+      "ffmpeg",
+      "ffmpeg.exe",
+      "C:\\ffmpeg\\bin\\ffmpeg.exe",
+      "/opt/homebrew/bin/ffmpeg",
+      "/usr/local/bin/ffmpeg",
+      "/usr/bin/ffmpeg",
+      "/snap/bin/ffmpeg"
     ]
   },
   "navigation": [
-    { "builtin": "home" },
-    { "title": "分类", "page": "categories", "icon": "playlist" },
-    { "builtin": "liked", "title": "喜欢" }
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "分类",
+      "page": "categories",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked",
+      "title": "喜欢"
+    }
   ]
 }
