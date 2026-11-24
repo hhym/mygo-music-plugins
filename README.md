@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 51 个，每个站点一个目录。51 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 52 个，每个站点一个目录。52 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（51 个）
+## 插件列表（52 个）
 
 按类型分四组：音乐 25 个、DJ音乐 2 个、听书 22 个、评书 2 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的七个为 2026-11-24 前后单独实测。
 
-### 音乐（25 个）
+### 音乐（26 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -16,7 +16,7 @@
 | 2 | [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | `5nd-music` | 1.6.2 | 能，内置 `Hm_lpvt_*` 统计 Cookie 后 App 内 206 直链，并把音频总大小交给播放器（时长可显示）；个别曲目仍被 302 时自动跳浏览器 |
 | 3 | [凤梨音乐](plugins/flmp3-music/) | [www.flmp3.pro](https://www.flmp3.pro/) | `flmp3-music` | 1.0.0 | 能，站点自己不放流，地址指向酷我 CDN |
 | 4 | [优折美音乐](plugins/uzz-music/) | [m.uzz.me](https://m.uzz.me/) | `uzz-music` | 1.0.0 | 能，走网易云同名直链（早先记录的「CloudFront 拦截」已不成立，2026-11-23 更正） |
-| 5 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | `carsmp3-music` | 1.0.0 | 目录能看，试听走网易云同名匹配 |
+| 5 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | `carsmp3-music` | 1.0.2 | 目录能看，试听走网易云同名匹配；内置 GBK 兜底解码、封面带 Referer、返回音频大小 |
 | 6 | [闪闪音乐](plugins/33ve/) | [www.33ve.com](https://www.33ve.com/) | `33ve` | 1.0.0 | 能，MP3 + LRC |
 | 7 | [5sing](plugins/5sing/) | [5sing.kugou.com](https://5sing.kugou.com/) | `5sing` | 1.0.0 | 能，原创 / 翻唱 / 伴奏 |
 | 8 | [动感酷音乐](plugins/dgcol/) | [www.dgcol.com](https://www.dgcol.com/) | `dgcol` | 1.0.0 | 能，但首页只有榜单、没有直挂曲目，自动探测取不到 id |
@@ -37,6 +37,7 @@
 | 23 | [放屁网](plugins/fangpiw/) | [www.fangpiw.com](https://www.fangpiw.com/) | `fangpiw` | 0.1.0 | 能出声，但播放接口给的是 `audition/` 试听片段（实测不足 1MB），不是整曲 |
 | 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |
 | 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
+| 26 | [番茄音乐](plugins/fanqie-music/) | [www.novelfm.com](https://www.novelfm.com/) | `fanqie-music` | 1.0.0 | 能，SSR 歌曲页取 m4a 直链（206），返回音频大小；网页版无搜索接口，搜索为首页 200 首本地匹配 |
 
 ### DJ音乐（2 个）
 

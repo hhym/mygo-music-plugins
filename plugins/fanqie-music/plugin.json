@@ -1,0 +1,39 @@
+{
+  "id": "fanqie-music",
+  "name": "番茄音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.novelfm.com",
+      "novelfm.com",
+      "m.novelfm.com",
+      "*.novelfmvod.com",
+      "*.byteimg.com",
+      "*.novelfmpic.com"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": ["*.byteimg.com", "*.novelfmpic.com"],
+      "kinds": ["image"],
+      "headers": {
+        "referer": "https://www.novelfm.com/"
+      }
+    },
+    {
+      "hosts": ["*.novelfmvod.com"],
+      "kinds": ["audio"],
+      "headers": {
+        "referer": "https://www.novelfm.com/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "排行榜", "page": "charts", "icon": "music" }
+  ]
+}
