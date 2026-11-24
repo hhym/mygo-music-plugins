@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 52 个，每个站点一个目录。52 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 53 个，每个站点一个目录。53 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（52 个）
+## 插件列表（53 个）
 
-按类型分四组：音乐 25 个、DJ音乐 2 个、听书 22 个、评书 2 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的七个为 2026-11-24 前后单独实测。
+按类型分四组：音乐 26 个、DJ音乐 2 个、听书 22 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
 
 ### 音乐（26 个）
 
@@ -73,12 +73,13 @@
 | 21 | [易听书网](plugins/yitingshu/) | [www.yitingshu.com](https://www.yitingshu.com/) | `yitingshu` | 0.1.0 | 首页/专辑可用，xmcdn m4a 直链已取得；当前云主机出口被 CDN 403 |
 | 22 | [99听书网](plugins/ting99/) | [www.ting99.com](https://www.ting99.com/) | `ting99` | 0.1.0 | 首页可用；专辑/播放页当前 520，源站恢复后可播 |
 
-### 评书（2 个）
+### 评书（3 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [单田芳评书网](plugins/pingshu5/) | [www.pingshu5.net](http://www.pingshu5.net) | `pingshu5` | 0.1.1 | 能，源音频是微信语音、易失效，走蜻蜓 FM 兜底 |
 | 2 | [我听评书网](plugins/qmtsw/) | [www.qmtsw.com](https://www.qmtsw.com/) | `qmtsw` | 0.1.0 | 当前源站 520；此前可解析 217 集专辑章节 |
+| 3 | [娓雅评书](plugins/wpingshu/) | [www.wpingshu.com](https://www.wpingshu.com/) | `wpingshu` | 0.1.0 | 能，xmcdn 的 m4a 回 206；个别老集文件已被清，换一集听 |
 
 ## 安装
 
@@ -274,11 +275,15 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 ## 评书
 
-传统评书，单一站点。
+传统评书。
 
 ### 单田芳评书网（pingshu5）
 
 `/pbook/<slug>.html` 书页与栏目页，源音频是微信语音直链，易失效，默认回退蜻蜓 FM。
+
+### 娓雅评书（wpingshu）
+
+站点：https://www.wpingshu.com/。帝国 CMS + AMP 模板的评书站，按「评书者」分人：`/stfps/` 单田芳、`/ykcps/` 袁阔成、`/llrps/` 连丽如、`/llfps/` 刘兰芳、`/tlyps/` 田连元、`/tzyps/` 田战义、`/zszps/` 张少佐（后两位常不在导航上，插件用内置表补齐）。书页 `/<分类>/<书名拼音>/`（成套的书是两段 `/llfps/llfps/plh75h/`），`<h1>` 书名、`/uploads/llr/` 封面、`评书者：`、`状态：`、`info-main-intro` 简介；章节取「目录」块（页面里另有一块「最新章节」是倒序 6 条，不能混用）。集页只有 `var articleId = "29027"`，音频号由站内脚本现算：`首位数+1` + `(articleId+250011)` + `"3"` + `末位数+3`，拼成 `/api/<号>.html` 取回 JSON 里的 `source src`（喜马拉雅 xmcdn 的 m4a，`.flv` 会被换成 `.mp3`）。站内没有可用搜索（`/search/` 一律 404），插件扫 7 个分类页建书名索引。回源 503 很频繁，页面与 `/api/` 都重试；少量老集在 xmcdn 上已回 404，只能换一集。
 
 ## 目录
 
@@ -311,12 +316,12 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 ### locales 现状
 
-44 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
+53 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
 
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 30 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 39 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 
