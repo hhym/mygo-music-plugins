@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 53 个，每个站点一个目录。53 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 54 个，每个站点一个目录。54 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（53 个）
+## 插件列表（54 个）
 
-按类型分四组：音乐 26 个、DJ音乐 2 个、听书 22 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
+按类型分四组：音乐 27 个、DJ音乐 2 个、听书 22 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
 
-### 音乐（26 个）
+### 音乐（27 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -38,6 +38,7 @@
 | 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |
 | 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
 | 26 | [番茄音乐](plugins/fanqie-music/) | [www.novelfm.com](https://www.novelfm.com/) | `fanqie-music` | 1.0.0 | 能，SSR 歌曲页取 m4a 直链（206），返回音频大小；网页版无搜索接口，搜索为首页 200 首本地匹配 |
+| 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.0 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中 |
 
 ### DJ音乐（2 个）
 
@@ -316,7 +317,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 ### locales 现状
 
-53 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
+54 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
 
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。

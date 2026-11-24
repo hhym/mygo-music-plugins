@@ -1,0 +1,43 @@
+{
+  "id": "damifan-music",
+  "name": "大米饭",
+  "description": "大米饭的推荐、随机、标签、歌单与搜索，曲库上万首，320kbps mp3 直接播放。",
+  "version": "0.1.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "api.buguyy.cc",
+      "www.buguyy.top",
+      "img1.kuwo.cn",
+      "img2.kuwo.cn",
+      "img3.kuwo.cn",
+      "img4.kuwo.cn",
+      "car-bj.kuwo.cn",
+      "car-er.kuwo.cn",
+      "car-lv.kuwo.cn",
+      "car-lw.kuwo.cn",
+      "car-sh.kuwo.cn",
+      "car-ty.kuwo.cn"
+    ]
+  },
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "标签",
+      "page": "tags",
+      "icon": "music"
+    },
+    {
+      "title": "歌单",
+      "page": "gedan:1",
+      "icon": "playlist"
+    },
+    {
+      "builtin": "liked"
+    }
+  ]
+}
