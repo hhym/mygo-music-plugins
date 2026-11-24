@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 42 个，每个站点一个目录。42 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 43 个，每个站点一个目录。43 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（42 个）
+## 插件列表（43 个）
 
-按类型分四组：音乐 21 个、DJ音乐 2 个、听书 18 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
+按类型分四组：音乐 21 个、DJ音乐 2 个、听书 19 个、评书 1 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`，「能不能播」来自 2026-11-23 的全量探测，详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)。
 
 ### 音乐（21 个）
 
@@ -41,7 +41,7 @@
 | 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
 | 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
 
-### 听书（18 个）
+### 听书（19 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -63,6 +63,7 @@
 | 16 | [一一听书](plugins/eyihu/) | [eyihu.com](https://eyihu.com/) | `eyihu` | 0.1.0 | 站点当前回 503 |
 | 17 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
 | 18 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
+| 19 | [听友听书](plugins/tingyou/) | [www.tingyou.fm](https://www.tingyou.fm/listening) | `tingyou` | 0.1.0 | 206 可播（实测 mp3） |
 
 ### 评书（1 个）
 
@@ -252,6 +253,11 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 站点：https://2q06.com。有声小说站，书 = 专辑、集 = 曲目，音频直链在喜马拉雅 CDN（`aod.cos.tx.xmcdn.com` 的 m4a，`Range` 回 206）。首页 / 分类卡片 `/mp3/<id>.html`（或站点自己的详情前缀）、分类页 `<前缀>/<tid>.html`、分页 `-<n>.html`；详情页给书名、封面、播讲与全部章节 `/play/<pid>-0-<i>.html`；播放页里 `var now="…"` 即当前集地址。站内 `search.php` 一律弹「系统安全验证」图形验证码，插件不去猜验证码，改为扫分类页前几页建本地书名索引，缓存 30 分钟再匹配。
 
+
+### 听友听书（tingyou）
+
+站点：https://www.tingyou.fm/listening。Nuxt 前端的白牌听书站，书 = 专辑、集 = 曲目，前端只做渲染，数据全在站内网关的明文通道 `/listening-api/*`（浏览器走的是同一份数据的加密通道 `api/h5/listening/*`，插件不碰那条）。榜单 `rank?section=latest|hot&page=N`、分类 `category?category=2&sort=popular|new|updated&page=N`（`2` 有声小说、`1` 评书，每类 20 条 × 100 页，`type` 细分参数实测不生效）、详情 `album/<id>`、章节 `chapters/<id>`（一次给全，`index` 从 1 起）。播放是 `POST play`，body `{album_id:"<字符串 id>", chapter_idx:<1 起的整数>}` 换回带 `ts`/`sign` 的签名直链（`fmfm.fdhtbz.cn/stream/…`，`Range` 回 206 `audio/mpeg`）；`album_id` 传数字会 400「听书分类参数无效」，`chapter_idx` 传 0 回 404，这两个坑写进了代码注释。站内搜索 `POST search` 没有验证码，直接可用；网关偶发 503，插件对每个接口重试 3 次。
+
 ## 评书
 
 传统评书，单一站点。
@@ -291,12 +297,12 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 ### locales 现状
 
-42 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
+43 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
 
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 28 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 29 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 
