@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 54 个，每个站点一个目录。54 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 53 个，每个站点一个目录。53 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（54 个）
+## 插件列表（53 个）
 
-按类型分四组：音乐 27 个、DJ音乐 2 个、听书 22 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
+按类型分四组：音乐 27 个、DJ音乐 2 个、听书 21 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
 
 ### 音乐（27 个）
 
@@ -47,32 +47,31 @@
 | 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
 | 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
 
-### 听书（22 个）
+### 听书（21 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.0.0 | 音单能，单曲是 Widevine 加密 HLS |
 | 2 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
 | 3 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
-| 4 | [飞卢听书](plugins/faloo/) | [ts.faloo.com](http://ts.faloo.com) | `faloo` | 0.1.1 | 能，源站 MP3 直链，解析失败回退蜻蜓 FM |
-| 5 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
-| 6 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
-| 7 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
-| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.2 | 能，HE-AAC 用 ffmpeg 转 AAC-LC；优先用播放器自带的那份（`host.ffmpegPath`），站点 503 时约 7 秒报人话 |
-| 9 | [环球听书](plugins/hqkomics/) | [hqkomics.com](https://hqkomics.com/) | `hqkomics` | 0.1.0 | 能，喜马拉雅 CDN 的 m4a 直链，Range 206 |
-| 10 | [更快听书](plugins/gkbasic/) | [gkbasic.com](https://gkbasic.com/) | `gkbasic` | 0.1.0 | 能，同上，详情在 `/basic/` |
-| 11 | [爱上听书](plugins/kmbas/) | [kmbas.com](https://kmbas.com/) | `kmbas` | 0.1.0 | 能，同上，书号和集号前缀不同 |
-| 12 | [59听书](plugins/ting59/) | [59ting.com](https://59ting.com/) | `ting59` | 0.1.0 | 能，详情 `/ting/`，m4a 206 |
-| 13 | [三九听书](plugins/sanjiuwang/) | [sanjiuwang.com](https://sanjiuwang.com/) | `sanjiuwang` | 0.1.0 | 能，m4a 206 |
-| 14 | [瓜播听书](plugins/guabo/) | [guabo.net](https://guabo.net/) | `guabo` | 0.1.0 | 206 可播（实测 m4a） |
-| 15 | [伊薇听书](plugins/eweizhi/) | [www.eweizhi.com](https://www.eweizhi.com/) | `eweizhi` | 0.1.0 | 站点当前 520（Cloudflare 源站错误） |
-| 16 | [一一听书](plugins/eyihu/) | [eyihu.com](https://eyihu.com/) | `eyihu` | 0.1.0 | 站点当前回 503 |
-| 17 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
-| 18 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
-| 19 | [听友听书](plugins/tingyou/) | [www.tingyou.fm](https://www.tingyou.fm/listening) | `tingyou` | 0.1.0 | 206 可播（实测 mp3） |
-| 20 | [石头听书](plugins/shitou/) | [www.shitou.club](https://www.shitou.club/list/cls/10042.html) | `shitou` | 0.1.0 | 音频在 B 站，需本机 ffmpeg 重封装 |
-| 21 | [易听书网](plugins/yitingshu/) | [www.yitingshu.com](https://www.yitingshu.com/) | `yitingshu` | 0.1.0 | 首页/专辑可用，xmcdn m4a 直链已取得；当前云主机出口被 CDN 403 |
-| 22 | [99听书网](plugins/ting99/) | [www.ting99.com](https://www.ting99.com/) | `ting99` | 0.1.0 | 首页可用；专辑/播放页当前 520，源站恢复后可播 |
+| 4 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
+| 5 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
+| 6 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
+| 7 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.2 | 能，HE-AAC 用 ffmpeg 转 AAC-LC；优先用播放器自带的那份（`host.ffmpegPath`），站点 503 时约 7 秒报人话 |
+| 8 | [环球听书](plugins/hqkomics/) | [hqkomics.com](https://hqkomics.com/) | `hqkomics` | 0.1.0 | 能，喜马拉雅 CDN 的 m4a 直链，Range 206 |
+| 9 | [更快听书](plugins/gkbasic/) | [gkbasic.com](https://gkbasic.com/) | `gkbasic` | 0.1.0 | 能，同上，详情在 `/basic/` |
+| 10 | [爱上听书](plugins/kmbas/) | [kmbas.com](https://kmbas.com/) | `kmbas` | 0.1.0 | 能，同上，书号和集号前缀不同 |
+| 11 | [59听书](plugins/ting59/) | [59ting.com](https://59ting.com/) | `ting59` | 0.1.0 | 能，详情 `/ting/`，m4a 206 |
+| 12 | [三九听书](plugins/sanjiuwang/) | [sanjiuwang.com](https://sanjiuwang.com/) | `sanjiuwang` | 0.1.0 | 能，m4a 206 |
+| 13 | [瓜播听书](plugins/guabo/) | [guabo.net](https://guabo.net/) | `guabo` | 0.1.0 | 206 可播（实测 m4a） |
+| 14 | [伊薇听书](plugins/eweizhi/) | [www.eweizhi.com](https://www.eweizhi.com/) | `eweizhi` | 0.1.0 | 站点当前 520（Cloudflare 源站错误） |
+| 15 | [一一听书](plugins/eyihu/) | [eyihu.com](https://eyihu.com/) | `eyihu` | 0.1.0 | 站点当前回 503 |
+| 16 | [我爱听书](plugins/ipangxie/) | [ipangxie.com](https://ipangxie.com/) | `ipangxie` | 0.1.0 | 站点当前回 503，详情在 `/book/` |
+| 17 | [幻听听书](plugins/q062/) | [2q06.com](https://2q06.com/) | `q062` | 0.1.0 | 站点当前 520，详情在 `/view/` |
+| 18 | [听友听书](plugins/tingyou/) | [www.tingyou.fm](https://www.tingyou.fm/listening) | `tingyou` | 0.1.0 | 206 可播（实测 mp3） |
+| 19 | [石头听书](plugins/shitou/) | [www.shitou.club](https://www.shitou.club/list/cls/10042.html) | `shitou` | 0.1.0 | 音频在 B 站，需本机 ffmpeg 重封装 |
+| 20 | [易听书网](plugins/yitingshu/) | [www.yitingshu.com](https://www.yitingshu.com/) | `yitingshu` | 0.1.0 | 首页/专辑可用，xmcdn m4a 直链已取得；当前云主机出口被 CDN 403 |
+| 21 | [99听书网](plugins/ting99/) | [www.ting99.com](https://www.ting99.com/) | `ting99` | 0.1.0 | 首页可用；专辑/播放页当前 520，源站恢复后可播 |
 
 ### 评书（3 个）
 
@@ -203,10 +202,6 @@ Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全�
 ### 恋听网（ting55）
 
 有声小说站，书 = 专辑、集 = 曲目。章节页读取一次性 token 调 `POST /nlinka` 换 `pp.ting55.com` 的 MP3，失败时走移动版 `/glink` 兜底。
-
-### 飞卢听书（faloo）
-
-GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直链；解析失败按书名回退蜻蜓 FM。
 
 ### 275听书（i275）
 
