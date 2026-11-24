@@ -20,10 +20,22 @@ const QT_SEARCH = "https://search.qtfm.cn";
 const QT_API = "https://webapi.qtfm.cn";
 const QT_WEB = "https://m.qtfm.cn";
 const QT_HEAD = { "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile", origin: QT_WEB, referer: QT_WEB + "/", accept: "application/json,*/*" };
+const QT_CATS = [
+  { id: "recommend", name: "推荐", query: "电台" },
+  { id: "music", name: "音乐", query: "音乐" },
+  { id: "news", name: "资讯", query: "资讯" },
+  { id: "emotion", name: "情感", query: "情感" },
+  { id: "story", name: "故事", query: "故事" },
+  { id: "book", name: "有声书", query: "有声书" },
+  { id: "comedy", name: "相声", query: "相声" },
+  { id: "talk", name: "脱口秀", query: "脱口秀" },
+];
 
 const pageCache = new Map();
 const knownTracks = new Map();
 const qtChannelCache = new Map();
+const qtAlbumMeta = new Map();
+const qtDocCache = new Map();
 
 function fail(code, message) { const e = new Error(message || code); e.code = code; return e; }
 function stored(k, f) { const v = host.storage.get(k); return v === undefined || v === null ? f : v; }
@@ -110,34 +122,149 @@ function parseList(page) {
   return out.slice(0, 60);
 }
 
-// ---- qtfm fallback ----
+// ---- qtfm：频道、节目与排版 ----
 function qtCore(n) { return String(n || "").replace(/[《》<>【】\[\]（）()：:·\-—_、，,。.!！?？\s]/g, "").replace(/(长篇|短篇|袍带|评书|有声|小说|经典|全集|在线听|mp3)/gi, ""); }
 function qtScore(a, b) { const x = [...qtCore(a)], y = new Set([...qtCore(b)]); if (!x.length || !y.size) return 0; let c = 0; for (const ch of x) if (y.has(ch)) c++; return c / Math.max(x.length, y.size); }
+
+function qtImage(u, size = 400) {
+  const x = absolute(u).replace(/^http:/i, "https:");
+  if (!x) return "";
+  return x.replace(/!\d+$/, "!" + size);
+}
+
+function qtAlbumName(d) {
+  const desc = clean(d && d.description);
+  const fromDesc = desc.match(/来自专辑《([^》]+)》/);
+  if (fromDesc) return clean(fromDesc[1]);
+  return clean((d && (d.title || d.name)) || "").replace(/[：:（(【\[].*$/, "").trim() || "蜻蜓FM";
+}
+
+function qtAlbumFromDoc(d) {
+  const type = String((d && d.type) || "");
+  const isChannel = type.includes("channel");
+  const chid = String(isChannel ? d.id : (d && d.parent_id) || "");
+  if (!chid || chid === "undefined") return null;
+  const id = `qtfm-ch:${chid}`;
+  if (qtAlbumMeta.has(id)) return qtAlbumMeta.get(id);
+  const album = {
+    id,
+    name: qtAlbumName(d),
+    imageUrl: qtImage(d && (d.cover || d.coverUrl || d.thumbnail), 400),
+    artists: [],
+    released: "",
+  };
+  qtAlbumMeta.set(id, album);
+  return album;
+}
+
+function qtAlbumsFromDocs(docs, limit = 24) {
+  const out = [], seen = new Set();
+  for (const d of docs || []) {
+    if (out.length >= limit) break;
+    const album = qtAlbumFromDoc(d);
+    if (!album || seen.has(album.id)) continue;
+    seen.add(album.id);
+    out.push(album);
+  }
+  return out;
+}
+
+function qtTrackFromDoc(d, albumOverride) {
+  if (!d || !d.id) return null;
+  const type = String(d.type || "");
+  const isChannel = type.includes("channel");
+  const chid = String(isChannel ? d.id : (d.parent_id || ""));
+  if (!chid) return null;
+  const album = albumOverride || qtAlbumFromDoc(d) || {
+    id: `qtfm-ch:${chid}`,
+    name: qtAlbumName(d),
+    imageUrl: qtImage(d.cover, 400),
+    artists: [],
+  };
+  const id = isChannel ? `qtfm:${chid}:1` : `qtfm-prog:${chid}:${d.id}`;
+  const artistName = clean(d.podcaster || d.nickname || "蜻蜓FM") || "蜻蜓FM";
+  const track = {
+    id,
+    name: clean(d.title || d.name || "有声节目"),
+    artists: [{ id: "", name: artistName }],
+    album,
+    duration: 0,
+  };
+  knownTracks.set(String(track.id), track);
+  return track;
+}
+
+function qtTracksFromDocs(docs, limit = 20, dedupe = false) {
+  const out = [], seen = new Set(), albums = new Set();
+  for (const d of docs || []) {
+    if (out.length >= limit) break;
+    const album = qtAlbumFromDoc(d);
+    if (!album) continue;
+    if (dedupe && albums.has(album.id)) continue;
+    const track = qtTrackFromDoc(d, album);
+    if (!track || seen.has(track.id)) continue;
+    seen.add(track.id);
+    albums.add(album.id);
+    out.push(track);
+  }
+  return out;
+}
+
 async function qtJson(url) {
-  const res = await fetch(url, { headers: { "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile", origin: QT_WEB, referer: QT_WEB + "/", accept: "application/json,*/*" } });
+  const res = await fetch(url, { headers: QT_HEAD });
   if (!res.ok) throw fail("unavailable", `蜻蜓FM ${res.status}`);
   return res.json();
 }
-async function qtDocs(term) {
-  const k = String(term || "").trim(); if (!k) return [];
-  const body = await qtJson(`${QT_SEARCH}/v3/search?include=channel&k=${encodeURIComponent(k)}&page=1&pagesize=20`);
-  return (((body || {}).data || {}).data || {}).docs || [];
-}
-async function qtPrograms(chid) {
-  const meta = await qtJson(`${QT_API}/api/mobile/channels/${chid}`);
-  const ch = (meta || {}).channel || {}; const v = String(ch.v || ""); if (!v) return [];
-  const list = [];
-  for (let p = 1; p <= Math.min(4, Math.ceil(Number(ch.program_count || 0) / 30) || 1); p++) {
-    const d = await qtJson(`${QT_API}/api/mobile/channels/${chid}/programs?version=${v}&page_index=${p}`);
-    const arr = (d || {}).programs || []; if (!arr.length) break; list.push(...arr);
+
+async function qtDocs(term, page = 1, pagesize = 20) {
+  const k = String(term || "").trim();
+  if (!k) return [];
+  const p = Math.max(1, Number(page) || 1);
+  const n = Math.max(1, Number(pagesize) || 20);
+  const key = `${k}|${p}|${n}`;
+  const hit = qtDocCache.get(key);
+  if (hit && Date.now() - hit.at < PAGE_TTL) return hit.docs;
+  const body = await qtJson(`${QT_SEARCH}/v3/search?include=channel&k=${encodeURIComponent(k)}&page=${p}&pagesize=${n}`);
+  const docs = (((body || {}).data || {}).data || {}).docs || [];
+  qtDocCache.set(key, { docs, at: Date.now() });
+  if (qtDocCache.size > 80) {
+    const old = [...qtDocCache.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+    if (old) qtDocCache.delete(old[0]);
   }
-  const free = list.filter((x) => x.isFree === true || x.saleStatus === "free" || Number(x.fee) === 0);
-  return (free.length ? free : list).sort((a, b) => Number(a.programId || 0) - Number(b.programId || 0));
+  return docs;
 }
+
+async function qtChannelBundle(chid) {
+  const key = String(chid || "");
+  const hit = qtChannelCache.get(key);
+  if (hit && Date.now() - hit.at < PAGE_TTL) return hit.data;
+  const meta = await qtJson(`${QT_API}/api/mobile/channels/${key}`);
+  const ch = (meta || {}).channel || {};
+  const v = String(ch.v || "");
+  if (!v) throw fail("unavailable", "蜻蜓FM频道缺少版本号");
+  const programs = [];
+  const pages = Math.min(3, Math.max(1, Math.ceil(Number(ch.program_count || 1) / 30)));
+  for (let p = 1; p <= pages; p++) {
+    const d = await qtJson(`${QT_API}/api/mobile/channels/${key}/programs?version=${v}&page_index=${p}`);
+    const arr = (d || {}).programs || [];
+    if (!arr.length) break;
+    programs.push(...arr);
+  }
+  const data = { channel: ch, programs };
+  qtChannelCache.set(key, { data, at: Date.now() });
+  return data;
+}
+
+async function qtPrograms(chid) {
+  const bundle = await qtChannelBundle(chid);
+  const free = bundle.programs.filter((x) => x.saleStatus === "free");
+  const list = free.length ? free : bundle.programs;
+  return list.slice().sort((a, b) => Number(b.programId || 0) - Number(a.programId || 0));
+}
+
 async function qtProg(chid, pid, title = "") {
-  /* 2026-11 起 m.qtfm.cn/vchannels/<chid>/programs/<pid>/ 变成了 SPA 空壳，
-     页面里不再有 audioUrl。音频地址改由 webapi 的 programInfo 给出，而且是
-     先回 302 再跳到带 auth_key 的签名 m4a；宿主不一定跟随 302，所以这里把
+  /* m.qtfm.cn 节目页已变成 SPA 空壳，音频地址由 webapi 的 programInfo 给出；
+     它先回 302 再跳到带 auth_key 的签名 m4a，宿主不一定跟随，所以这里把
      location 解出来，直接把最终地址交出去。 */
   let res;
   try {
@@ -157,42 +284,82 @@ async function qtProg(chid, pid, title = "") {
   if (!raw) return null;
 
   let url = raw;
+  let redirected = false;
   try {
     const head = await fetch(url, { headers: QT_HEAD, redirect: "manual" });
     const loc = head.headers.get("location");
-    if (loc) url = new URL(loc, url).href;
+    if (loc) { url = new URL(loc, url).href; redirected = true; }
   } catch (error) {
     /* 解不出 302 就交原地址，宿主若会跟随也能播 */
+  }
+
+  // 付费节目也会给出 audioUrl，但跳到签名地址后返回 401。先用 HEAD 验一下
+  // 最终文件，避免把必然失败的地址交给播放器。
+  if (redirected && /vohwod-client-sign\.qtfm\.cn|\.m4a(?:$|\?)/i.test(url)) {
+    try {
+      const check = await fetch(url, { method: "HEAD", headers: QT_HEAD });
+      if (!check.ok) return null;
+    } catch (error) {
+      return null;
+    }
   }
 
   return { url: url, type: /\.m4a(?:$|\?)/i.test(url) ? "m4a" : "mp3", headers: { referer: QT_WEB + "/", "user-agent": "Mozilla/5.0" }, title: clean(title) };
 }
 
-async function qtChannelStream(chid, ep = 1) { const p = await qtPrograms(chid); if (!p.length) return null; const i = Math.min(Math.max(Number(ep) || 1, 1), p.length) - 1; return qtProg(chid, p[i].programId, p[i].title || ""); }
+async function qtChannelStream(chid, ep = 1) {
+  const p = await qtPrograms(chid);
+  if (!p.length) return null;
+  const start = Math.min(Math.max(Number(ep) || 1, 1), p.length) - 1;
+  for (let i = start; i < Math.min(p.length, start + 6); i++) {
+    const r = await qtProg(chid, p[i].programId, p[i].title || "");
+    if (r) return r;
+  }
+  return null;
+}
+
 async function qtByName(name, ep = 1) {
   const docs = await qtDocs(name);
   for (const d of docs) {
     if (!d || qtScore(d.title || "", name) < 0.3) continue;
-    if (String(d.type || "").includes("channel")) { const r = await qtChannelStream(d.id, ep); if (r) return r; }
-    else if (String(d.type || "").includes("program") && d.parent_id) { const r = await qtProg(d.parent_id, d.id, d.title || ""); if (r) return r; }
+    if (String(d.type || "").includes("channel")) {
+      const r = await qtChannelStream(d.id, ep);
+      if (r) return r;
+    } else if (String(d.type || "").includes("program") && d.parent_id) {
+      const r = await qtProg(d.parent_id, d.id, d.title || "");
+      if (r) return r;
+    }
   }
   return null;
 }
+
 async function qtTracks(term, limit = 16, dedupe = false) {
-  const docs = await qtDocs(term); const out = [], seen = new Set(), albums = new Set();
-  for (const d of docs) {
-    if (out.length >= limit) break; if (!d || !d.id) continue;
-    const typ = String(d.type || ""); const isCh = typ.includes("channel"); const isProg = typ.includes("program") && d.parent_id;
-    if (!isCh && !isProg) continue;
-    const id = isProg ? `qtfm-prog:${d.parent_id}:${d.id}` : `qtfm:${d.id}:1`;
-    const alb = d.parent_id ? String(d.parent_id) : String(d.id);
-    if (seen.has(id) || (dedupe && albums.has(alb))) continue;
-    seen.add(id); albums.add(alb);
-    const cover = d.cover || d.coverUrl || d.thumbnail || "";
-    const t = makeTrack(id, d.title || d.name || "有声节目", { artists: [{ name: d.podcaster || d.nickname || "蜻蜓FM", id: "" }], album: { id: `qtfm:${alb}`, name: "蜻蜓FM 兜底", imageUrl: absolute(cover).replace(/^http:/i, "https:") } });
-    knownTracks.set(String(t.id), t); out.push(t);
-  }
-  return out;
+  const docs = await qtDocs(term, 1, Math.max(20, limit));
+  return qtTracksFromDocs(docs, limit, dedupe);
+}
+
+function categoryLinks() {
+  return QT_CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` }));
+}
+
+function publisherOf(channel) {
+  const text = clean((channel && channel.description) || "");
+  const match = text.match(/^(.{2,24}?)(?:的|，|,|。|：|:)/);
+  if (match && /广播|电台|频率|卫视|FM|节目/.test(match[1])) return match[1];
+  return "蜻蜓FM";
+}
+
+function albumOfChannel(channel, chid) {
+  const publisher = publisherOf(channel);
+  const album = {
+    id: `qtfm-ch:${chid}`,
+    name: clean(channel.title || channel.name || "蜻蜓FM频道"),
+    imageUrl: qtImage((channel.thumbs && channel.thumbs["800_thumb"]) || channel.cover, 800),
+    artists: [{ id: "", name: publisher }],
+    released: String(channel.create_time || "").slice(0, 10),
+  };
+  qtAlbumMeta.set(album.id, album);
+  return album;
 }
 
 // ---- audio finder ----
@@ -266,58 +433,149 @@ async function missevanAudio(url) {
 }
 
 // ---- exports ----
+const HOME_SECTIONS = [
+  { title: "推荐电台", query: "电台", limit: 14 },
+  { title: "音乐电台", query: "音乐", limit: 8 },
+  { title: "资讯电台", query: "资讯", limit: 8 },
+  { title: "情感电台", query: "情感", limit: 8 },
+];
+
 export async function home() {
+  const results = await Promise.allSettled(HOME_SECTIONS.map((x) => qtDocs(x.query, 1, 20)));
   const sections = [];
-  if (CFG.mode !== "qtfm") {
-    try {
-      const list = parseList(await html(CFG.homePath || "/"));
-      if (list.length) {
-        remember(list);
-        sections.push({ title: "最新更新", tracks: list.slice(0, 30), pageTitle: CFG.name });
-        if (CATS.length) sections.push({ title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) });
-        return { title: CFG.name, subtitle: CFG.subtitle || "", sections };
-      }
-    } catch (e) {}
+  let firstDocs = null;
+  results.forEach((result, index) => {
+    if (result.status !== "fulfilled" || !result.value.length) return;
+    const def = HOME_SECTIONS[index];
+    if (!firstDocs) firstDocs = result.value;
+    const albums = qtAlbumsFromDocs(result.value, def.limit);
+    if (albums.length) sections.push({ title: def.title, albums, empty: "这里暂时没有频道" });
+  });
+
+  let tracks = [];
+  if (firstDocs) tracks = qtTracksFromDocs(firstDocs, 12, true);
+  if (!tracks.length) {
+    try { tracks = await qtTracks("电台", 12, true); } catch (e) {}
   }
-  const fallback = await qtTracks(CFG.seed || "有声小说", 16, true);
-  if (fallback.length) sections.push({ title: "推荐收听", subtitle: "源站暂时不可用，以下为蜻蜓FM同书兜底", tracks: fallback, pageTitle: "蜻蜓FM" });
-  if (CATS.length) sections.push({ title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) });
-  return { title: CFG.name, subtitle: CFG.subtitle || "", sections };
+  if (tracks.length) sections.push({ title: "热门节目", tracks, morePage: "popular", empty: "这里暂时没有节目" });
+
+  sections.push({ title: "按类型发现", links: categoryLinks() });
+  return {
+    title: "听FM电台",
+    subtitle: "蜻蜓FM 频道与节目",
+    description: "按频道聚合推荐，点进频道查看最新节目；播放时解析蜻蜓FM 的签名 m4a 直链。",
+    sections,
+  };
 }
 
 export async function browse({ page }) {
   const raw = String(page || "");
-  if (raw === "categories" || !raw) return { title: `${CFG.name}分类`, sections: [{ title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] };
-  const m = raw.match(/^cat:([^:]+):(\d+)$/); if (!m) throw fail("unavailable", "没有这个页面");
-  const cat = CATS.find((c) => String(c.id).toLowerCase() === decodeURIComponent(m[1]).toLowerCase());
-  if (!cat) throw fail("unavailable", "没有这个分类");
-  let list = [];
-  try { list = parseList(await html((cat.path || CFG.catPath || "").replace("{id}", encodeURIComponent(cat.id)))); } catch (e) {}
-  if (list.length) { remember(list); return { title: cat.name, subtitle: CFG.name, sections: [{ title: cat.name, tracks: list }, { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] }; }
-  const fb = await qtTracks(cat.query || cat.name, 16, true);
-  return { title: cat.name, subtitle: "源站暂时不可用，以下为蜻蜓FM兜底", sections: [{ title: cat.name, subtitle: "蜻蜓FM 兜底", tracks: fb }, { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${encodeURIComponent(c.id)}:1` })) }] };
+
+  if (raw === "home") return home();
+
+  if (!raw || raw === "categories") {
+    return {
+      title: "电台分类",
+      subtitle: QT_CATS.length + " 个分类",
+      sections: [
+        { title: "全部分类", links: categoryLinks() },
+        { title: "返回", links: [{ title: "返回首页", page: "home" }] },
+      ],
+    };
+  }
+
+  if (raw === "popular") {
+    const settled = await Promise.allSettled([qtDocs("电台", 1, 20), qtDocs("电台", 2, 20)]);
+    const docs = settled.flatMap((x) => x.status === "fulfilled" ? x.value : []);
+    const tracks = qtTracksFromDocs(docs, 40, false);
+    return {
+      title: "热门节目",
+      subtitle: tracks.length + " 个节目",
+      sections: [
+        { title: "热门节目", tracks, empty: "这里暂时没有节目" },
+        { title: "返回", links: [{ title: "返回首页", page: "home" }, { title: "全部分类", page: "categories" }] },
+      ],
+    };
+  }
+
+  const m = raw.match(/^cat:([^:]+):(\d+)$/);
+  if (m) {
+    const id = decodeURIComponent(m[1]);
+    const cat = QT_CATS.find((c) => c.id === id);
+    if (!cat) throw fail("unavailable", "没有这个分类");
+    const p = Math.max(1, Number(m[2]) || 1);
+    const docs = await qtDocs(cat.query, p, 20);
+    const albums = qtAlbumsFromDocs(docs, 20);
+    const links = [];
+    if (p > 1) links.push({ title: "上一页", page: `cat:${encodeURIComponent(cat.id)}:${p - 1}` });
+    if (docs.length >= 20) links.push({ title: "下一页", page: `cat:${encodeURIComponent(cat.id)}:${p + 1}` });
+    links.push({ title: "全部分类", page: "categories" });
+    return {
+      title: cat.name + (p > 1 ? " · 第 " + p + " 页" : ""),
+      subtitle: albums.length + " 个频道",
+      sections: [
+        { title: cat.name, albums, empty: "这个分类暂时没有频道" },
+        { title: "翻页", links },
+      ],
+    };
+  }
+
+  throw fail("unavailable", "没有这个页面");
 }
 
 export async function search({ query, kind = "tracks", offset = 0 }) {
-  if (kind && kind !== "tracks" && kind !== "track") return { tracks: [], more: false };
-  const term = String(query || "").trim(); if (!term) return { tracks: [], more: false };
-  if (CFG.searchPath) {
-    try {
-      const list = parseList(await html(CFG.searchPath.replace("{q}", encodeURIComponent(term))));
-      if (list.length) { remember(list); return { tracks: list, more: false }; }
-    } catch (e) {}
-  }
-  return { tracks: await qtTracks(term, 20), more: false };
+  const term = String(query || "").trim();
+  if (!term) return { tracks: [], albums: [], more: false };
+  const page = Math.max(1, Math.floor(Number(offset || 0) / 20) + 1);
+  const docs = await qtDocs(term, page, 20);
+  const more = docs.length >= 20;
+  if (kind === "albums") return { albums: qtAlbumsFromDocs(docs, 30), more };
+  if (kind === "tracks" || kind === "track") return { tracks: qtTracksFromDocs(docs, 40, false), more };
+  if (kind === "artists") return { artists: [], more: false };
+  return { tracks: [], more: false };
 }
 
 export async function suggest({ query }) {
-  try { return (await qtTracks(String(query || ""), 6)).map((t) => t.name); } catch (e) { return []; }
+  try {
+    const docs = await qtDocs(String(query || ""), 1, 10);
+    const names = [], seen = new Set();
+    for (const d of docs) {
+      const name = clean(d.title || d.name);
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      names.push(name);
+    }
+    return names.slice(0, 8);
+  } catch (e) { return []; }
+}
+
+export async function album({ id }) {
+  const raw = String(id || "");
+  const match = raw.match(/^qtfm-ch:(\d+)$/);
+  if (!match) throw fail("unavailable", "没有这张电台专辑");
+  const chid = match[1];
+  const bundle = await qtChannelBundle(chid);
+  const channel = bundle.channel || {};
+  const meta = albumOfChannel(channel, chid);
+  const publisher = (meta.artists && meta.artists[0] && meta.artists[0].name) || "蜻蜓FM";
+  const list = bundle.programs.slice(0, 60);
+  const tracks = list.map((p) => ({
+    id: `qtfm-prog:${chid}:${p.programId}`,
+    name: clean(p.title || "未命名节目"),
+    artists: [{ id: "", name: publisher }],
+    album: meta,
+    duration: Number(p.duration || 0) * 1000,
+    unavailable: p.saleStatus !== "free",
+  }));
+  if (!tracks.length) throw fail("unavailable", "这个频道暂时没有可播放的节目");
+  remember(tracks);
+  return { album: meta, tracks };
 }
 
 export async function stream({ id }) {
   const raw = String(id || "");
   const prog = raw.match(/^qtfm-prog:(\d+):(\d+)$/);
-  if (prog) { const r = await qtProg(prog[1], prog[2]); if (!r) throw fail("unavailable", "蜻蜓FM兜底音频暂时取不到"); return r; }
+  if (prog) { const t = trackBy(raw); const r = await qtProg(prog[1], prog[2], t ? t.name : ""); if (!r) throw fail("unavailable", "蜻蜓FM兜底音频暂时取不到"); return r; }
   const qt = raw.match(/^qtfm:(\d+):(\d+)$/);
   if (qt) { const r = await qtChannelStream(qt[1], Number(qt[2]) || 1); if (!r) throw fail("unavailable", "蜻蜓FM兜底音频暂时取不到"); return r; }
 

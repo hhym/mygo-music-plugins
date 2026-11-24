@@ -56,7 +56,7 @@
 | 2 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
 | 3 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
 | 4 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
-| 5 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
+| 5 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.2.0 | 能，蜻蜓 FM 频道聚合首页，频道页 60 期，签名 m4a 可播 |
 | 6 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
 | 7 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.2 | 能，HE-AAC 用 ffmpeg 转 AAC-LC；优先用播放器自带的那份（`host.ffmpegPath`），站点 503 时约 7 秒报人话 |
 | 8 | [环球听书](plugins/hqkomics/) | [hqkomics.com](https://hqkomics.com/) | `hqkomics` | 0.1.0 | 能，喜马拉雅 CDN 的 m4a 直链，Range 206 |
@@ -214,7 +214,7 @@ Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全�
 
 ### 听FM电台（tingfm）
 
-电台页 `tingfm.net/radio/<id>` 可解析 `playlist.m3u8` 直播流，另带蜻蜓兜底。
+首页不再只有一条「推荐收听」大横幅，而是把蜻蜓 FM 搜索结果按 `parent_id` 聚合成频道卡片：推荐电台 14 个、音乐 / 资讯 / 情感各 8 个，下面接「热门节目」12 条和 8 个分类入口；侧边栏新增「分类」「热门」。频道页读取 `webapi.qtfm.cn` 的频道与节目列表，列出最新 60 期，付费期标记不可播；单集播放解析 `programInfo.audioUrl` 的 302 签名 m4a，并先用 HEAD 校验最终文件，失败自动尝试下一期免费节目。
 
 ### 悦听吧（yuetingba）
 
