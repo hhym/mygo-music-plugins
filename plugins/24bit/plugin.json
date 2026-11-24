@@ -1,0 +1,72 @@
+{
+  "id": "24bit",
+  "name": "24bit无损音乐",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.24bit.net",
+      "24bit.net",
+      "*.24bit.net",
+      "*.segmentfault.com",
+      "*.kuwo.cn",
+      "*.music.126.net",
+      "*.126.net"
+    ]
+  },
+  "requestHeaders": [
+    {
+      "hosts": [
+        "*.segmentfault.com",
+        "*.kuwo.cn",
+        "*.music.126.net",
+        "*.126.net"
+      ],
+      "kinds": [
+        "image",
+        "audio"
+      ],
+      "headers": {
+        "referer": "https://www.24bit.net/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "hosts": [
+        "www.24bit.net",
+        "24bit.net",
+        "*.24bit.net"
+      ],
+      "kinds": [
+        "image",
+        "audio"
+      ],
+      "headers": {
+        "referer": "https://www.24bit.net/",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "navigation": [
+    {
+      "builtin": "home"
+    },
+    {
+      "title": "榜单",
+      "page": "charts",
+      "icon": "chart"
+    },
+    {
+      "title": "歌手",
+      "page": "artists",
+      "icon": "star"
+    },
+    {
+      "title": "关于",
+      "page": "about",
+      "icon": "music"
+    }
+  ]
+}

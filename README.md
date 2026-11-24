@@ -2,13 +2,13 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 53 个，每个站点一个目录。53 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 54 个，每个站点一个目录。54 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
 
-## 插件列表（53 个）
+## 插件列表（54 个）
 
-按类型分四组：音乐 27 个、DJ音乐 2 个、听书 21 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的八个为 2026-11-24 前后单独实测。
+按类型分四组：音乐 28 个、DJ音乐 2 个、听书 21 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的九个为 2026-11-24/25 单独实测。
 
-### 音乐（27 个）
+### 音乐（28 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
@@ -39,6 +39,7 @@
 | 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
 | 26 | [番茄音乐](plugins/fanqie-music/) | [www.novelfm.com](https://www.novelfm.com/) | `fanqie-music` | 1.0.0 | 能，SSR 歌曲页取 m4a 直链（206），返回音频大小；网页版无搜索接口，搜索为首页 200 首本地匹配 |
 | 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.0 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中 |
+| 28 | [24bit无损音乐](plugins/24bit/) | [www.24bit.net](https://www.24bit.net/) | `24bit` | 1.0.0 | 能，首页榜单实时解析；搜索同时列 16bit 44.1kHz 与 24bit 192kHz，单曲页取 FLAC 直链（16bit 实测 `audio/x-flac`，24bit 文件头 `fLaC`）；24bit 96kHz 接口不稳定，未作主链路 |
 
 ### DJ音乐（2 个）
 
@@ -174,6 +175,10 @@ Nuxt SPA，只有 `hotlist` / `newlist` / `search` / `geturl` 四条公开接口
 ### 一起听歌吧（jusic-room）
 
 Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全走 SockJS + STOMP，插件用 xhr 轮询实现匿名进房。只读跟随：正在播放与待播队列带服务端签好的直链，能播；搜索只有元数据（直链只在点歌入队那一刻签出来），所以搜索条目标为不可播，插件从不发 `/music/pick`，不往房间投歌。
+
+### 24bit无损音乐（24bit）
+
+站点：https://www.24bit.net/。单曲站，一个搜索结果就是一首歌，没有真正的专辑目录；插件把一首单曲当作一张一首曲目的专辑，专辑名后附带音质。首页解析 RSC 里的 `weekData` 做「本周歌曲榜」「本周歌手榜」，歌曲榜点进去按歌名搜索同名单曲，歌手榜点进去按歌手名搜索。搜索并行请求 `searchOnlineMusicTwo`（16bit，每页 30 条）与 `searchOnlineMusicOne`（24bit 192kHz，每页 30 条），两接口偶发 503，插件做退避重试。单曲页 `/music/b|a|c/<id>` 内嵌 `itemMusic`，`stream()` 取其中的 FLAC 直链；16bit 与 24bit 都实测可播，歌词优先读 `itemMusic.lrc`，16bit 的 `$c` 占位则从同页另一段 RSC 字符串提取。24bit 96kHz 的 `searchOnlineMusicThree` 不稳定，当前主链路只用 192kHz。
 
 ## DJ音乐
 
@@ -317,7 +322,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
 
-剩下 39 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
+剩下 40 个没有 `en.json`，英文界面显示中文原文，这是明确取舍，不是漏做。
 
 ### 定时探测
 

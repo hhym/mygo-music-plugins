@@ -1,0 +1,11 @@
+{
+  "name": "24bit无损音乐",
+  "subtitle": "16bit 44.1kHz · 24bit 192kHz 母带直链",
+  "charts": "本周榜单",
+  "songs": "本周歌曲榜",
+  "artists": "本周歌手榜",
+  "about": "关于",
+  "search": "搜索单曲",
+  "empty": "这里暂时没有内容",
+  "loadFailed": "24bit 页面加载失败"
+}
