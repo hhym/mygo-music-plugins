@@ -1,7 +1,7 @@
 {
   "id": "85ting",
   "name": "85听书网",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -42,12 +42,12 @@
     {
       "key": "transcode",
       "label": "转码播放",
-      "help": "85听书网的音频是 HE-AAC，应用自身解不了，需要本机装好 ffmpeg 并允许本插件运行它。填 0 关闭转码，直接播放原地址（多数内容会报 SBR 错误）。"
+      "help": "85听书网的音频是 HE-AAC，应用自身解不了，要用 ffmpeg 转成 AAC-LC。播放器（3.0.94 起）自带 ffmpeg，不用装系统版。填 0 关闭转码，直接播放原地址（多数内容会报 SBR 错误）。"
     },
     {
       "key": "ffmpegPath",
       "label": "ffmpeg 路径",
-      "help": "留空则自动查找（先按 PATH，再试 /opt/homebrew/bin、/usr/local/bin 等常见位置）。找不到时填上完整路径，例如 /opt/homebrew/bin/ffmpeg。",
+      "help": "留空就先用播放器自带的 ffmpeg；要指定别的版本时填完整路径（Windows 例 C:\\ffmpeg\\bin\\ffmpeg.exe）。",
       "link": "https://ffmpeg.org/download.html"
     }
   ]

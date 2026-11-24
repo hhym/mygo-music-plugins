@@ -21,10 +21,45 @@ const known = new Map();
 const waiting = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function fail(code, message) { const e = new Error(message || code); e.code = code; return e; }
+function unescapeHtml(s) {
+  return String(s || "").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
 function clean(s) { return String(s || "").replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, " ").trim(); }
 function abs(u) { if (!u) return ""; if (/^https?:/i.test(u)) return u; return BASE + (u.startsWith("/") ? u : "/" + u); }
 function numId(v) { const m = String(v || "").match(/\/ting\/(\d+)\.html|\/play\/(\d+)-|\b(\d{3,})\b/); return m ? (m[1] || m[2] || m[3]) : ""; }
 function streamType(u) { return /\.m3u8(?:$|\?)/i.test(u) ? "hls" : /\.m4a(?:$|\?)/i.test(u) ? "m4a" : /\.flac(?:$|\?)/i.test(u) ? "flac" : "mp3"; }
+
+// 站点回源经常 503 或者干脆半开连接不返回。之前是 6 轮 × 3 并发、单请求没有超时，
+// 最坏能拖到半分钟以上（实测 503 时 26 秒才报错）。改成小预算 + 单请求超时：
+// 正常情况下第一次就拿得到，站点挂了 2 秒左右就给出提示。
+const REQ_TIMEOUT = 3500;   // 单次请求最多等 3.5 秒
+const FAIL_BUDGET = 8000;   // 一轮没成功就按时间预算收敛，不再硬撑六轮
+const ROUNDS = 2;
+const CONCURRENT = 2;
+
+function fetchOnce(url, opts) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), REQ_TIMEOUT);
+  const init = {
+    method: (opts && opts.method) || "GET",
+    headers: { "user-agent": UA, referer: url.replace(/^([^/]+\/\/[^/]+).*/, "$1/"), ...(opts && opts.headers || {}) },
+    body: opts && opts.body,
+    signal: ctrl.signal,
+  };
+  return fetch(url, init)
+    .then(async (res) => {
+      if (!res.ok) throw fail("upstream", `HTTP ${res.status}`);
+      const text = await res.text();
+      if (!text || text.length < 120) throw fail("upstream", "empty body");
+      return text;
+    })
+    .catch((e) => {
+      // 超时要给人话，不然界面上只会出现 "This operation was aborted"
+      if (e && (e.name === "AbortError" || /abort|超时|timeout/i.test(String(e.message)))) throw fail("timeout", "站点响应超时");
+      throw e;
+    })
+    .finally(() => clearTimeout(timer));
+}
 
 async function fetchText(path, opts) {
   const rel = /^https?:/i.test(path) ? path.replace(/^https?:\/\/[^/]+/i, "") : path;
@@ -33,33 +68,37 @@ async function fetchText(path, opts) {
   if (hit && Date.now() - hit.t < TTL) return hit.v;
   const hosts = ["https://www.85ting.com", "https://85ting.com"];
   let last = null;
-  for (let round = 0; round < 6; round++) {
+  const started = Date.now();
+  for (let round = 0; round < ROUNDS; round++) {
+    if (round > 0 && Date.now() - started > FAIL_BUDGET) break;
     const host = hosts[round % hosts.length];
-    const tasks = [0, 1, 2].map(async () => {
-      const res = await fetch(host + rel, { method: (opts && opts.method) || "GET", headers: { "user-agent": UA, referer: host + "/", ...(opts && opts.headers || {}) }, body: opts && opts.body });
-      if (!res.ok) throw fail("upstream", `HTTP ${res.status}`);
-      const text = await res.text();
-      if (!text || text.length < 120) throw fail("upstream", "empty body");
-      return text;
-    });
+    const tasks = Array.from({ length: CONCURRENT }, () => fetchOnce(host + rel, opts));
     const results = await Promise.allSettled(tasks);
     for (const r of results) {
       if (r.status === "fulfilled") { cache.set(ck, { t: Date.now(), v: r.value }); return r.value; }
       last = r.reason;
     }
-    await waiting(150 + 100 * round);
+    if (round < ROUNDS - 1) await waiting(150 + 100 * round);
   }
+  if (last && last.code === "timeout") throw fail("unavailable", "站点响应超时或连不上，过一会儿再试");
   throw last || fail("unavailable", "站点暂时无法访问");
 }
 function parseList(html) {
   const out = []; const seen = new Set();
-  const re = /<a[^>]+href="\/ting\/(\d+)\.html"[^>]*(?:title="([^"]*)")?[^>]*>([\s\S]*?)<\/a>/gi;
+  const re = /<a[^>]*href="\/ting\/(\d+)\.html"[^>]*>([\s\S]*?)<\/a>/gi;
   let m;
   while ((m = re.exec(html))) {
     const id = m[1]; if (seen.has(id)) continue;
-    const block = m[3] || "";
-    const title = clean(m[2] || (/<span[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/span>/i.exec(block) || [])[1] || (/<i[^>]*>([\s\S]*?)<\/i>/i.exec(block) || [])[1] || "");
-    const img = (block.match(/<img[^>]+data-original="([^"]+)"/i) || block.match(/<img[^>]+src="([^"]+)"/i) || [])[1] || "";
+    const tag = m[0].slice(0, m[0].indexOf(">") + 1);
+    const block = m[2] || "";
+    // 标题可能在 a 的 title 属性上，也可能在里面的 span.title / i 里，挨个试
+    const title = clean(
+      (tag.match(/\btitle="([^"]*)"/i) || [])[1] ||
+      (/<span[^>]*class="[^"]*title[^"]*"[^>]*>([\s\S]*?)<\/span>/i.exec(block) || [])[1] ||
+      (/<i[^>]*>([\s\S]*?)<\/i>/i.exec(block) || [])[1] ||
+      ""
+    );
+    const img = (block.match(/<img[^>]+data-original="([^"]+)"/i) || tag.match(/<img[^>]+data-original="([^"]+)"/i) || block.match(/<img[^>]+src="([^"]+)"/i) || tag.match(/<img[^>]+src="([^"]+)"/i) || [])[1] || "";
     if (!title) continue;
     seen.add(id);
     const t = { id: `/ting/${id}.html`, name: title, artists: [], album: { id, name: title, imageUrl: /load\.gif/i.test(img) ? "" : abs(img) }, duration: 0 };
@@ -83,10 +122,10 @@ export async function home() {
   const list = parseList(html).slice(0, 30);
   remember(list);
   return {
-    title: "畅听网",
+    title: "85听书网",
     subtitle: "有声小说与评书",
     sections: [
-      { title: "最新更新", tracks: list, albums: albumCards(list), pageTitle: "畅听网" },
+      { title: "最新更新", tracks: list, albums: albumCards(list), pageTitle: "首页" },
       { title: "分类", links: CATS.map((c) => ({ title: c.name, page: `cat:${c.id}:1` })) },
     ],
   };
@@ -179,12 +218,22 @@ const FFMPEG_DIRS = {
   win32: ["ffmpeg.exe", "C:\\ffmpeg\\bin\\ffmpeg.exe", "C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe"],
 };
 function candidates() {
-  const set = host.setting("ffmpegPath");
   const list = [];
+  // 播放器自带的 ffmpeg 优先：3.0.94 起宿主会在启动时把它解压好并作为 host.ffmpegPath 给插件，
+  // 用户不用再装系统 ffmpeg。
+  const builtin = typeof host.ffmpegPath === "string" ? String(host.ffmpegPath) : "";
+  if (builtin) list.push(builtin);
+  const set = host.setting("ffmpegPath");
   if (set) list.push(String(set));
   if (isWindows) list.push("ffmpeg.exe", "ffmpeg");
   else list.push("ffmpeg");
   for (const p of FFMPEG_DIRS[isWindows ? "win32" : host.platform] || []) list.push(p);
+  // 兜底：host.dataDir 是 <数据目录>/plugin-data/<id>，内置 ffmpeg 放在 <数据目录>/ffmpeg/ffmpeg.exe
+  if (isWindows) {
+    const dd = String(host.dataDir || "");
+    const up = dd.replace(/[\\/]plugin-data[\\/].*$/i, "");
+    if (up && up !== dd) list.push(up + "\\ffmpeg\\ffmpeg.exe");
+  }
   return [...new Set(list)];
 }
 async function transcode(url, path, referer) {
@@ -226,7 +275,8 @@ export async function stream({ id } = {}) {
     target = first[1];
   }
   const page = await fetchText(target);
-  const u = (page.match(/var\s+now\s*=\s*"([^"]+)"/i) || [])[1];
+  const raw = (page.match(/var\s+now\s*=\s*"([^"]+)"/i) || [])[1];
+  const u = unescapeHtml(raw);
   if (!u) throw fail("unavailable", "源站没有返回音频地址");
   const referer = abs(target);
   if (!transcodeOn()) return { url: u, type: streamType(u), headers: { referer, "user-agent": UA }, title: "" };
@@ -245,17 +295,36 @@ export async function stream({ id } = {}) {
     save("85ting:slots", slots);
     return { url: fileURL(path), type: "m4a", title: "" };
   } catch (e) {
-    throw fail("setup", `85听书网的音频是 HE-AAC，需要本机安装 ffmpeg 并允许插件运行它 — ${e && e.message ? e.message : e}`);
+    throw fail("setup", `转码失败（音频是 HE-AAC，要靠 ffmpeg 转成 AAC-LC）：先确认播放器自带的 ffmpeg 能跑；如果这台机器上它起不来，装一个系统 ffmpeg 再试 — ${e && e.message ? e.message : e}`);
   }
 }
 
 export function lyrics() { return {}; }
 
 const LIKE = "85ting:liked";
+const LIKE_T = "85ting:likedTracks";
 function stored(k, d) { try { const v = host.storage.get(k); return v == null ? d : (typeof v === "string" ? JSON.parse(v) : v); } catch (e) { return d; } }
 function save(k, v) { host.storage.set(k, JSON.stringify(v)); }
-export function like({ id, on } = {}) { const s = new Set(stored(LIKE, [])); const k = String(id); if (on) s.add(k); else s.delete(k); save(LIKE, [...s]); return { id: k, liked: !!on }; }
+export function like({ id, on, name, artists, album, duration } = {}) {
+  const s = new Set(stored(LIKE, []));
+  const k = String(id);
+  if (on) s.add(k); else s.delete(k);
+  save(LIKE, [...s]);
+  // 顺带把这一集本身存下来：known 只活在内存里，重启后按 id 找回曲目是空的，
+  // 「喜欢」页就会整页空着。宿主乐意多传字段就带着，不传也不影响收藏本身。
+  const lt = stored(LIKE_T, {});
+  if (on && (name || album)) {
+    const t = { id: k, name: name || (album && album.name) || "未命名", artists: artists || [], album: album || {}, duration: duration || 0 };
+    lt[k] = t; remember([t]);
+  } else if (!on && lt[k]) delete lt[k];
+  save(LIKE_T, lt);
+  return { id: k, liked: !!on };
+}
 export function isLiked({ ids } = {}) { const s = new Set(stored(LIKE, [])); const o = {}; for (const id of ids || []) o[id] = s.has(String(id)); return o; }
-export function liked({ offset = 0 } = {}) { const all = stored(LIKE, []).map((id) => known.get(id)).filter(Boolean); return { tracks: all.slice(offset, offset + 60), more: all.length > offset + 60 }; }
+export function liked({ offset = 0 } = {}) {
+  const lt = stored(LIKE_T, {});
+  const all = stored(LIKE, []).map((id) => known.get(id) || lt[id]).filter(Boolean);
+  return { tracks: all.slice(offset, offset + 60), more: all.length > offset + 60 };
+}
 export function played({ id } = {}) { if (!id) return {}; const list = stored("85ting:history", []).filter((x) => x !== id); list.push(String(id)); save("85ting:history", list.slice(-100)); const t = known.get(String(id)); if (t) save("85ting:historyTracks", { ...stored("85ting:historyTracks", {}), [id]: t }); return {}; }
 export function recent() { const ids = stored("85ting:history", []).slice().reverse(); const d = stored("85ting:historyTracks", {}); return ids.map((id) => d[id] || known.get(id)).filter(Boolean).slice(0, 20); }

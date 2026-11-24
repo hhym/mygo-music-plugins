@@ -52,7 +52,7 @@
 | 5 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
 | 6 | [听FM电台](plugins/tingfm/) | [cn.tingfm.com](https://cn.tingfm.com) | `tingfm` | 0.1.1 | 能，m3u8 直播流，另带蜻蜓兜底 |
 | 7 | [悦听吧](plugins/yuetingba/) | [www.yuetingba.cn](http://www.yuetingba.cn) | `yuetingba` | 0.1.4 | 能，全站 1002 本，单集直链，失败回退蜻蜓 |
-| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.0 | 能，HE-AAC 用本机 ffmpeg 转 AAC-LC；站点回源 503 频繁，插件双域名并发重试 |
+| 8 | [85听书网](plugins/85ting/) | [www.85ting.com](https://www.85ting.com/) | `85ting` | 0.2.2 | 能，HE-AAC 用 ffmpeg 转 AAC-LC；优先用播放器自带的那份（`host.ffmpegPath`），站点 503 时约 7 秒报人话 |
 | 9 | [环球听书](plugins/hqkomics/) | [hqkomics.com](https://hqkomics.com/) | `hqkomics` | 0.1.0 | 能，喜马拉雅 CDN 的 m4a 直链，Range 206 |
 | 10 | [更快听书](plugins/gkbasic/) | [gkbasic.com](https://gkbasic.com/) | `gkbasic` | 0.1.0 | 能，同上，详情在 `/basic/` |
 | 11 | [爱上听书](plugins/kmbas/) | [kmbas.com](https://kmbas.com/) | `kmbas` | 0.1.0 | 能，同上，书号和集号前缀不同 |
@@ -212,7 +212,7 @@ GBK 页面，书页 `/listen/<id>.html`，音频为 `tss.faloo.com` 的 MP3 直�
 
 ### 85听书网（85ting）
 
-首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集音频，源多为喜马拉雅 HE-AAC；插件默认调用本机 ffmpeg 转成 AAC-LC 再播放，缓存 8 集到插件数据目录，没有 ffmpeg 时会在设置里提示。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、每轮 3 并发、最多 6 轮重试。
+首页与分类解析 `/ting/<id>.html` 卡片；分类 `/list/85X.html`，分页 `/list/85X-N.html`；搜索走 `POST /search.php` 的 `searchword`；专辑读取 `/ting/<id>.html` 的 `vlink` 全部章节；播放页 `var now="..."` 即当前集音频，源多为喜马拉雅 HE-AAC；插件用 ffmpeg 转成 AAC-LC 再播放，缓存 8 集到插件数据目录。0.2.2 起优先取 `host.ffmpegPath`（葫芦音乐 3.0.94 自带 ffmpeg），拿不到再试 PATH / 常见安装目录 / `<数据目录>/ffmpeg/ffmpeg.exe`。站点回源经常 503，插件用 `www.85ting.com` 与 `85ting.com` 双域名、2 轮 × 2 并发、单请求 3.5 秒超时，挂了约 7 秒报「站点响应超时或连不上」。
 
 ### 环球听书（hqkomics）
 
