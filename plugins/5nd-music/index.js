@@ -23,9 +23,10 @@
 //   audio       https://mpge.5nd.com/<msongpath>
 //
 // Note on audio: mpge.5nd.com sits behind an anti-leech edge. A browser plays
-// it, while plain HTTP clients (curl, Go) get 302 to 127.0.0.1:1234. stream()
-// therefore hands the app the Referer and User-Agent a browser would send, and
-// a cookie from the settings when one is given.
+// it; a bare HTTP client gets 302 to 127.0.0.1:1234. The edge only checks that
+// an Hm_lpvt_* analytics cookie is present, not its value, so the plugin ships
+// EDGE_COOKIE and App playback works without the user touching a browser.
+// A cookie pasted in settings still wins, for the day the site renames it.
 
 const BASE = "https://www.5nd.com";
 const MEDIA = "https://mpge.5nd.com";
@@ -37,6 +38,10 @@ const HEAD = {
   accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 };
 
+/* 2026-11-24 实测：mpge.5nd.com 只检查有没有 Hm_lpvt_* 这个统计 Cookie，
+   值是 1 也能拿到 206；不带就是 302 到 127.0.0.1:1234。 */
+const EDGE_COOKIE = "Hm_lpvt_b0886cdce91635b40ead075af50a1bdf=1";
+
 const t = (text) => host.t(text);
 
 function fail(code, message) {
@@ -47,6 +52,10 @@ function fail(code, message) {
 
 function manualCookie() {
   return String(host.setting("cookie") || "").trim();
+}
+
+function edgeCookie() {
+  return manualCookie() || EDGE_COOKIE;
 }
 
 function deadline(promise, ms, label) {
@@ -80,8 +89,7 @@ async function once(url, init, ms) {
 async function request(path, options = {}) {
   const url = path.indexOf("http") === 0 ? path : BASE + path;
   const headers = Object.assign({}, HEAD, options.headers || {});
-  const cookie = manualCookie();
-  if (cookie) headers.cookie = cookie;
+  headers.cookie = edgeCookie();
   const init = { method: options.method || "GET", headers: headers };
   if (options.body != null) init.body = options.body;
   const ms = options.timeout || 10000;
@@ -652,26 +660,35 @@ const playableCache = new Map();
    listener gets a sentence instead of the app's "HTTP 502" line. */
 async function playable(url) {
   const cached = playableCache.get(url);
-  if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached.ok;
+  if (cached && Date.now() - cached.at < 5 * 60 * 1000) return cached;
   let ok = false;
+  let size = 0;
   try {
     const res = await once(
       url,
       {
         headers: Object.assign({}, HEAD, {
           referer: BASE + "/",
+          cookie: edgeCookie(),
           range: "bytes=0-1",
         }),
       },
       6000
     );
     ok = res.status === 206 || res.status === 200;
+    if (ok) {
+      /* Range 命中时 content-length 是这 2 个字节，总大小在 content-range 里。 */
+      const range = res.headers.get("content-range") || "";
+      const total = Number((range.match(/\/\s*(\d+)/) || [])[1]);
+      size = total > 0 ? total : Number(res.headers.get("content-length")) || 0;
+    }
     if (ok && res.body && typeof res.body.cancel === "function") res.body.cancel().catch(() => {});
   } catch (error) {
     ok = false;
   }
-  playableCache.set(url, { at: Date.now(), ok: ok });
-  return ok;
+  const probe = { at: Date.now(), ok: ok, size: size };
+  playableCache.set(url, probe);
+  return probe;
 }
 
 const openedTabs = new Map();
@@ -698,26 +715,26 @@ export async function stream({ id }) {
     referer: BASE + "/ting/" + id + ".html",
     "user-agent": UA,
   };
-  const cookie = manualCookie();
-  if (cookie) headers.cookie = cookie;
+  headers.cookie = edgeCookie();
   const url = MEDIA + "/" + String(info.msongpath).replace(/^\/+/, "");
 
-  if (!(await playable(url))) {
+  const probe = await playable(url);
+  if (!probe.ok) {
     const page = BASE + "/ting/" + id + ".html";
-    // 默认就走浏览器兜底：5nd 的音频域名只认浏览器的 TLS 指纹，Go 客户端怎么带
-    // Referer / Cookie 都会被 302 到 127.0.0.1:1234，所以不在设置里动开关也能播。
+    // 内置 EDGE_COOKIE 之后 mpge 一般会放行；仍然 302 说明该出口被单独拦了，
+    // 这时才走浏览器兜底，设置里关掉即只在 App 内尝试。
     const preference = String(host.setting("browser") || "").trim();
     if (preference !== "off") {
       const opened = openInBrowser(id, page);
       if (opened) {
-        throw fail("unavailable", t("5nd 只放行浏览器，已在浏览器打开这首歌"));
+        throw fail("unavailable", t("5nd 音频被拒，已在浏览器打开这首歌"));
       }
-      throw fail("unavailable", t("5nd 只放行浏览器，App 内播不了，这台机器也没法打开浏览器"));
+      throw fail("unavailable", t("5nd 音频被拒，App 内播不了，这台机器也没法打开浏览器"));
     }
-    throw fail("unavailable", t("5nd 只放行浏览器，App 内播不了。插件设置里把「音频被拒时用浏览器打开」调回默认即可自动开浏览器"));
+    throw fail("unavailable", t("5nd 音频被拒，App 内播不了。插件设置里把「音频被拒时用浏览器打开」调回默认即可自动开浏览器"));
   }
 
-  return { url: url, type: "mp3", headers: headers };
+  return { url: url, type: "mp3", headers: headers, size: probe.size || undefined };
 }
 
 /* ------------------------------------------------------------------ */

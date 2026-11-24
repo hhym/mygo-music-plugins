@@ -12,5 +12,8 @@
   "5nd 只放行浏览器，已用浏览器打开这首歌": "5nd only plays in a browser, so it is opening there.",
   "音频地址暂时取不到，稍后重试": "The audio address was not available, try again in a moment.",
   "这首歌暂时播放不了": "This song cannot be played right now.",
-  "没有这个页面": "No such page."
+  "没有这个页面": "No such page.",
+  "5nd 音频被拒，已在浏览器打开这首歌": "5nd blocked the stream, so this song is opening in your browser.",
+  "5nd 音频被拒，App 内播不了，这台机器也没法打开浏览器": "5nd blocked the stream and cannot play in the app; this machine cannot open a browser either.",
+  "5nd 音频被拒，App 内播不了。插件设置里把「音频被拒时用浏览器打开」调回默认即可自动开浏览器": "5nd blocked the stream, so it cannot play in the app. Set “open in browser when audio is rejected” back to its default to open it automatically."
 }

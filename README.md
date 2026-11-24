@@ -13,7 +13,7 @@
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [世纪音乐](plugins/4c44-music/) | [www.4c44.com](https://www.4c44.com/) | `4c44-music` | 1.1.0 | 能，MP3 直链 + 动态歌词（首页要过一次勾选校验，首次请求偏慢） |
-| 2 | [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | `5nd-music` | 1.6.0 | 只认浏览器：UA、Cookie、http/https 都试过，音频域名一律 302 到 127.0.0.1，默认自动跳浏览器 |
+| 2 | [5nd音乐](plugins/5nd-music/) | [www.5nd.com](https://www.5nd.com/) | `5nd-music` | 1.6.2 | 能，内置 `Hm_lpvt_*` 统计 Cookie 后 App 内 206 直链，并把音频总大小交给播放器（时长可显示）；个别曲目仍被 302 时自动跳浏览器 |
 | 3 | [凤梨音乐](plugins/flmp3-music/) | [www.flmp3.pro](https://www.flmp3.pro/) | `flmp3-music` | 1.0.0 | 能，站点自己不放流，地址指向酷我 CDN |
 | 4 | [优折美音乐](plugins/uzz-music/) | [m.uzz.me](https://m.uzz.me/) | `uzz-music` | 1.0.0 | 能，走网易云同名直链（早先记录的「CloudFront 拦截」已不成立，2026-11-23 更正） |
 | 5 | [汽车音乐网](plugins/carsmp3-music/) | [www.carsmp3.com](https://www.carsmp3.com/) | `carsmp3-music` | 1.0.0 | 目录能看，试听走网易云同名匹配 |
@@ -81,7 +81,7 @@
 
 两个下载入口，内容完全一样：
 
-- [Releases](https://github.com/hhym/mygo-music-plugins/releases/latest)：每个插件一个 zip，文件名是 `id-版本.zip`，例如 `5nd-music-1.6.0.zip`（纯 ASCII，不会因中文名下载乱码）；
+- [Releases](https://github.com/hhym/mygo-music-plugins/releases/latest)：每个插件一个 zip，文件名是 `id-版本.zip`，例如 `5nd-music-1.6.1.zip`（纯 ASCII，不会因中文名下载乱码）；
 - 仓库内 `dist/` 目录：`<id>-<版本>.zip`，同样纯 ASCII 并带版本号，随 main 分支更新（中文对照见上方插件列表）。
 
 ## 音乐
@@ -94,7 +94,7 @@
 
 ### 5nd音乐（5nd-music）
 
-歌曲、榜单、歌手、专辑、电台，带歌词。音频在 `mpge.5nd.com`，部分曲目是分片容器（m4s / flac 分片），宿主的 `stream` 只认 `mp3/flac/ogg/wav/m4a/aac`，这类会报「这段流播不了」，换一首或换音源即可。个别曲目音频域名会拒绝 App，需要在设置里贴 Cookie。
+歌曲、榜单、歌手、专辑、电台，带歌词。音频在 `mpge.5nd.com`，部分曲目是分片容器（m4s / flac 分片），宿主的 `stream` 只认 `mp3/flac/ogg/wav/m4a/aac`，这类会报「这段流播不了」，换一首或换音源即可。1.6.1 起插件内置一枚 `Hm_lpvt_*` 统计 Cookie（该边缘只校验 Cookie 名，不校验值），`playable()` 与 `stream()` 都带上，App 内能直接 206 播放；仍被 302 时按设置自动跳浏览器，也可粘贴自己的 Cookie 覆盖内置值。
 
 ### 凤梨音乐（flmp3-music）
 

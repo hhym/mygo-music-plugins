@@ -2,7 +2,7 @@
   "id": "5nd-music",
   "name": "5nd音乐",
   "description": "5nd音乐网的歌曲、榜单、歌手与专辑，带动态歌词。",
-  "version": "1.6.0",
+  "version": "1.6.2",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -54,12 +54,12 @@
           "label": "只在 App 里播（5nd 播不了）"
         }
       ],
-      "help": "5nd 的音频域名只认浏览器：App 的 Go 客户端无论带 Referer / UA / Cookie 都会被 302 到 127.0.0.1:1234。默认点播放就在系统浏览器里打开这首歌；整张专辑连播时同一首 45 秒内只开一个标签页。"
+      "help": "插件已内置一枚 mpge.5nd.com 认的统计 Cookie，App 内通常能直接播。只有在当前网络仍被 302 到 127.0.0.1 时才用这个开关：默认自动在系统浏览器打开这首歌（整张专辑连播时同一首 45 秒内只开一个标签页）。"
     },
     {
       "key": "cookie",
       "label": "Cookie（可选）",
-      "help": "只在音频域名拒绝 App 时使用：用浏览器打开 www.5nd.com，在开发者工具里复制 mpge.5nd.com 请求的整条 Cookie 粘贴到这里。"
+      "help": "一般不用填，插件已自带内置 Cookie。只有当内置 Cookie 失效（例如站点换了统计 Cookie 名）时，才用浏览器打开 www.5nd.com，从开发者工具里复制 mpge.5nd.com 请求的整条 Cookie 粘贴到这里，它会覆盖内置值。"
     }
   ],
   "navigation": [
