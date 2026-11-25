@@ -604,6 +604,7 @@ async function songPage(path, id, options) {
     format: String(item.format || extensionOf(fallbackAudio) || "flac").toLowerCase(),
     quality: stripTags(item.quality) || "",
     size: stripTags(item.size) || "",
+    sizeBytes: bytesOf(item.size),
     url: decodeEntities(item.url) || fallbackAudio || "",
     lyrics: lyrics || "",
     pageUrl: BASE + "/music/" + path + "/" + id,
@@ -625,6 +626,22 @@ function extensionOf(url) {
   const path = String(url || "").split("?")[0].toLowerCase();
   const match = path.match(/\.(flac|mp3|m4a|aac|ogg|wav)$/);
   return match ? match[1] : "";
+}
+
+function isPreview(item) {
+  const ext = extensionOf(item && item.url);
+  if ((item.format === "flac" && ext && ext !== "flac") || ext === "aac") return true;
+  return false;
+}
+
+function bytesOf(size) {
+  const match = String(size || "").match(/([\d.]+)\s*(GB|MB|KB|B)/i);
+  if (!match) return 0;
+  const n = Number(match[1]);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  const unit = match[2].toUpperCase();
+  const scale = unit === "GB" ? 1024 ** 3 : unit === "MB" ? 1024 ** 2 : unit === "KB" ? 1024 : 1;
+  return Math.round(n * scale);
 }
 
 function parseAlbumId(id) {
@@ -902,8 +919,19 @@ export async function lyrics({ id } = {}) {
 
 export async function stream({ id } = {}) {
   const track = parseTrackId(id);
-  // 专辑页刚取到的直链可以直接用；超过一分钟再重新请求单曲页，避免票据过期。
-  const item = await songPage(track.path, track.id, { maxAge: 60 * 1000 });
+  // 直链带时效票据。十分钟内复用页面里的直链；站点偶尔只给 12 秒的 AAC
+  // 试听片段（.aac 却标成 flac），这时强制重新抓页，仍拿不到完整 FLAC 就
+  // 明确报错，不把试听片段当整首歌交给播放器。
+  let item = await songPage(track.path, track.id, { maxAge: 10 * 60 * 1000 });
+  if (isPreview(item)) {
+    await sleep(1200);
+    item = await songPage(track.path, track.id, {
+      fresh: true,
+      attempts: 2,
+      timeout: 7000,
+    });
+  }
+  if (isPreview(item)) throw fail("站点只返回了试听片段，请稍后重试", "unavailable");
   if (!item.url) throw fail("这首歌没有可用的播放地址");
   let url = item.url;
   if (url.startsWith("//")) url = "https:" + url;
@@ -912,11 +940,21 @@ export async function stream({ id } = {}) {
   if (!["mp3", "flac", "ogg", "wav", "m4a", "aac"].includes(type)) {
     type = extensionOf(url) || "flac";
   }
+  let referer = item.pageUrl;
+  try {
+    const host = new URL(url).hostname;
+    if (host.endsWith("kuwo.cn")) referer = "https://www.kuwo.cn/";
+    else if (host.endsWith("126.net")) referer = "https://music.163.com/";
+  } catch (_) {
+    // 保持单曲页 Referer
+  }
   return {
     url,
     type,
+    quality: "lossless",
+    size: item.sizeBytes || 0,
     headers: {
-      referer: item.pageUrl,
+      referer,
       "user-agent": UA,
     },
   };

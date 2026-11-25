@@ -1,7 +1,7 @@
 {
   "id": "24bit",
   "name": "24bit无损音乐",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",

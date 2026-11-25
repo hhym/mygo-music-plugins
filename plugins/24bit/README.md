@@ -2,7 +2,7 @@
 
 站点：<https://www.24bit.net/>
 
-版本：`1.0.1`  
+版本：`1.0.2`  
 插件 ID：`24bit`
 
 ## 功能
@@ -12,7 +12,7 @@
 - 封面：歌曲封面取同名歌曲的专辑图，歌手头像取网易云公开搜索接口的 `picUrl`；失败时回退站点占位图
 - 搜索：同时请求 16bit 与 24bit 192kHz 两个接口，返回单曲「专辑」与歌曲条目
 - 专辑页：把一首单曲当作一张一首曲目的专辑，解析封面、歌手、专辑名、格式与大小
-- 播放：从单曲页内嵌的 `itemMusic.url` 取 FLAC 直链，带站点 Referer 与浏览器 UA
+- 播放：从单曲页内嵌的 `itemMusic.url` 取 FLAC 直链；十分钟内复用页面直链，识别站点偶尔返回的 12 秒 AAC 试听片段并重新抓页；返回 `size` 与 `quality: lossless`，按 CDN 域名设置 Referer
 - 歌词：优先读 `itemMusic.lrc`，不可用时从同页 RSC 的 LRC 字符串提取
 
 ## 播放链路
@@ -48,10 +48,11 @@ Body: {"keyword":"...","page":1}
 - 榜单解析需要逐首调用 24bit 搜索接口，接口 503 时会少展示几首；页面已缓存，二次打开更快。
 - 24bit 96kHz 的 `searchOnlineMusicThree` 接口不稳定，当前主链路使用 24bit 192kHz 的 `searchOnlineMusicOne`。
 - 单曲页的 `itemMusic.lrc` 在 16bit 页面里可能是 `"$c"` 占位，真实 LRC 由插件从同页另一段 RSC 字符串提取。
+- 站点在请求过快时会把 `itemMusic.url` 换成 12 秒的 AAC 试听片段（扩展名 `.aac`，但仍标 `format: flac`）。插件会识别并退避重抓；仍失败时明确报「只返回了试听片段」，不会把片段当整首歌播放。
 
 ## 安装
 
-把 `24bit-1.0.1.zip` 放进 MyGo 插件目录，或在应用内选择本地插件安装。
+把 `24bit-1.0.2.zip` 放进 MyGo 插件目录，或在应用内选择本地插件安装。
 
 ## 文件
 
