@@ -40,6 +40,12 @@
 - 本机库：喜欢、最近播放；封面与时长都记住了
 - 建议词：标签名（`/malbum/recommand` 缓存 30 分钟，首次用内置常见标签兜底）
 
+## 可选：蜻蜓FM 同名回退（默认关闭）
+
+单曲接口给的是 Widevine HLS，插件本身拒绝播放。设置里打开「蜻蜓FM 同名回退」后，这类曲目会按节目名去蜻蜓FM 搜同名音频顶上，播放列表的标题会带「·蜻蜓FM」，标明不是猫耳的内容；开关关闭时保持原行为，直接报错。
+
+默认关闭是有意的：自动换源最容易让人以为在播猫耳，真要这个体验，得自己去设置里打开。开了之后音单直链仍然优先，只有拿不到明文音频时才走兜底。
+
 ## 不支持
 
 - **剧集/广播剧搜索**：`/dramaapi/search` 对游客返回 `count: 0`（试过带 referer、换关键词都一样），所以搜索只做声音
@@ -51,7 +57,7 @@
 
 1. 文件夹：把 `mygo-plugin-missevan-music` 放进应用的 `plugins` 目录。
 2. zip：设置 → 插件 → `+` → 选 `猫耳FM-mygo插件.zip`。
-3. GitHub：推到公开仓库，加 `mygo-music-plugin` topic。
+3. GitHub：[hhym/mygo-music-missevan-plugin](https://github.com/hhym/mygo-music-missevan-plugin)，已加 `mygo-music-plugin` topic。
 
 `minAppVersion` 是 `0.1.20`；文案全中文写死，没有 `locales/en.json`。
 

@@ -485,6 +485,108 @@ async function probe(url) {
   }
 }
 
+/* ------------------------------------------------------------ qingting fallback
+   The Widevine HLS cannot be played here, and a bare "failed" leaves the user
+   with no way out. With the qtFallback switch turned on, the same programme
+   name is looked up on Qingting FM and its audio is played instead; the source
+   is written into the title so it is never mistaken for a missevan track.
+   Off by default: the plugin would rather refuse than swap the source quietly. */
+
+const QT_SEARCH = "https://search.qtfm.cn";
+const QT_API = "https://webapi.qtfm.cn";
+const QT_WEB = "https://m.qtfm.cn";
+const QT_UA =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 Mobile Safari/537.36";
+
+function qtEnabled() {
+  try {
+    return String((host.setting && host.setting("qtFallback")) || "off") === "on";
+  } catch (error) {
+    return false;
+  }
+}
+
+function qtCore(name) {
+  return String(name || "")
+    .replace(/[《》<>【】\[\]（）()：:·\-—_、，,。.!！?？\s]/g, "")
+    .replace(/(长篇|短篇|袍带|评书|有声|小说|经典|全集|在线听|mp3)/gi, "");
+}
+
+function qtScore(a, b) {
+  const left = [...qtCore(a)];
+  const right = new Set([...qtCore(b)]);
+  if (!left.length || !right.size) return 0;
+  let hit = 0;
+  for (const ch of left) if (right.has(ch)) hit++;
+  return hit / Math.max(left.length, right.size);
+}
+
+async function qtJson(url) {
+  const res = await fetch(url, {
+    headers: { "user-agent": QT_UA, origin: QT_WEB, referer: QT_WEB + "/", accept: "application/json,*/*" },
+  });
+  if (!res.ok) throw fail("unavailable", "蜻蜓FM " + res.status);
+  return res.json();
+}
+
+async function qtEpisode(chid, pid, title) {
+  const res = await fetch(QT_WEB + "/vchannels/" + chid + "/programs/" + pid + "/", {
+    headers: { "user-agent": QT_UA, referer: QT_WEB + "/" },
+  });
+  if (!res.ok) return null;
+  const page = await res.text();
+  if (/用户未购买/.test(page)) return null;
+  const found = /"audioUrl":"([^"]+)"/.exec(page);
+  if (!found) return null;
+  const url = found[1].replace(/\\\//g, "/");
+  if (!/^https?:\/\//i.test(url)) return null;
+  return {
+    url: url,
+    type: /\.m4a(\?|$)/i.test(url) ? "m4a" : "mp3",
+    headers: { referer: QT_WEB + "/", "user-agent": UA },
+    title: title,
+  };
+}
+
+async function qtChannelEpisode(chid) {
+  const meta = await qtJson(QT_API + "/api/mobile/channels/" + chid);
+  const channel = (meta && meta.channel) || {};
+  const version = String(channel.v || "");
+  if (!version) return null;
+  const list = await qtJson(
+    QT_API + "/api/mobile/channels/" + chid + "/programs?version=" + version + "&page_index=1",
+  );
+  const programs = (list && list.programs) || [];
+  const free = programs.filter(
+    (item) => item.isFree === true || item.saleStatus === "free" || Number(item.fee) === 0,
+  );
+  const first = (free.length ? free : programs)[0];
+  if (!first) return null;
+  return qtEpisode(chid, first.programId, first.title || "");
+}
+
+async function qtByName(name) {
+  const keyword = String(name || "").trim();
+  if (!keyword) return null;
+  const body = await qtJson(
+    QT_SEARCH + "/v3/search?include=channel&k=" + encodeURIComponent(keyword) + "&page=1&pagesize=20",
+  );
+  const docs = (((body || {}).data || {}).data || {}).docs || [];
+  for (const doc of docs) {
+    if (!doc || !doc.id) continue;
+    if (qtScore(doc.title || "", keyword) < 0.3) continue;
+    const type = String(doc.type || "");
+    if (type.includes("channel")) {
+      const hit = await qtChannelEpisode(doc.id);
+      if (hit) return hit;
+    } else if (type.includes("program") && doc.parent_id) {
+      const hit = await qtEpisode(doc.parent_id, doc.id, doc.title || "");
+      if (hit) return hit;
+    }
+  }
+  return null;
+}
+
 export async function stream({ id }) {
   const key = String(id || "");
   const sid = key.indexOf("s") === 0 ? key.slice(1) : key;
@@ -498,14 +600,31 @@ export async function stream({ id }) {
 
   /* Not seen in any sheet yet: ask the API. A plain file can be played, but a
      hls.m3u8 means the Widevine copy, and that one stays unplayed. */
-  const sound = await soundInfo(sid);
-  const url = directLink(sound.soundurl) || directLink(sound.soundurl_128);
+  let sound = null;
+  let apiError = null;
+  try {
+    sound = await soundInfo(sid);
+  } catch (error) {
+    apiError = error;
+  }
+  const url = sound ? directLink(sound.soundurl) || directLink(sound.soundurl_128) : "";
   if (url) {
     saveMedia(sid, url);
     const ext = (url.split("?")[0].match(/\.([a-z0-9]+)$/i) || [])[1] || "m4a";
     return { url: url, type: TYPE_OF[ext.toLowerCase()] || "m4a" };
   }
 
+  if (qtEnabled()) {
+    const name = trackById(key).name;
+    if (name && name !== key) {
+      const alt = await qtByName(name).catch(() => null);
+      if (alt) {
+        return { url: alt.url, type: alt.type, headers: alt.headers, title: name + " · 蜻蜓FM" };
+      }
+    }
+  }
+
+  if (apiError) throw apiError;
   throw fail(
     "unavailable",
     t("这条声音在站点里是 Widevine 加密的 HLS，第三方播放器解不了；请在猫耳FM 客户端收听，或换音单里的曲目"),

@@ -1,14 +1,34 @@
 {
   "id": "missevan-music",
   "name": "猫耳FM",
-  "description": "猫耳FM（missevan.com）的广播剧、音乐音单与声音搜索，音单里的曲目可试听。",
-  "version": "1.0.0",
+  "description": "猫耳FM（missevan.com）的广播剧、音乐音单与声音搜索，音单里的曲目可试听；可选按节目名到蜻蜓FM 找同名音频。",
+  "version": "1.1.0",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
   "permissions": {
-    "network": ["www.missevan.com", "*.maoercdn.com"]
+    "network": [
+      "www.missevan.com",
+      "*.maoercdn.com",
+      "search.qtfm.cn",
+      "webapi.qtfm.cn",
+      "m.qtfm.cn",
+      "audio.qtfm.cn",
+      "pic.qtfm.cn"
+    ]
   },
+  "settings": [
+    {
+      "key": "qtFallback",
+      "label": "蜻蜓FM 同名回退",
+      "type": "select",
+      "options": [
+        { "value": "off", "label": "关闭（默认）：只播音单里的明文音频" },
+        { "value": "on", "label": "开启：被拒时按节目名找蜻蜓FM 同名音频" }
+      ],
+      "help": "猫耳的单曲接口返回 Widevine 加密 HLS，第三方播放器解不了。开启后这类曲目会按节目名到蜻蜓FM 找同名节目顶上，播放列表标题会带「·蜻蜓FM」标明来源；关闭时直接报错，不偷换音源。"
+    }
+  ],
   "navigation": [
     { "builtin": "home" },
     { "title": "推荐音单", "page": "sheets" },
