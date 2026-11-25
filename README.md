@@ -52,7 +52,7 @@
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.0.0 | 音单能，单曲是 Widevine 加密 HLS |
+| 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.1.0 | 音单能，单曲是 Widevine 加密 HLS；可选蜻蜓FM 同名回退（默认关） |
 | 2 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
 | 3 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
 | 4 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
@@ -198,7 +198,7 @@ Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全�
 
 ### 猫耳FM（missevan-music）
 
-广播剧、音乐音单、声音搜索。音单接口 `/sound/soundalllist` 里的 `soundurl` 是明文 m4a，能播；单曲接口 `/sound/getsound` 给的是 Widevine 加密 HLS，插件不去绕 DRM，从搜索结果直接点会提示加密。
+广播剧、音乐音单、声音搜索。音单接口 `/sound/soundalllist` 里的 `soundurl` 是明文 m4a，能播；单曲接口 `/sound/getsound` 给的是 Widevine 加密 HLS，插件不去绕 DRM，从搜索结果直接点会提示加密。1.1.0 起添了一个默认关闭的「蜻蜓FM 同名回退」：开启后这类曲目按节目名去蜻蜓 FM 搜同名音频顶上，标题带 `·蜻蜓FM`，只是换源、不是解密；关着时行为不变，一次蜻蜓请求都不发。
 
 ### 听书网（tingshuwang-music）
 
