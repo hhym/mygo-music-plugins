@@ -47,6 +47,16 @@ const DEFAULT_TIER = "b";
 let pageCache = new Map();
 let apiCache = new Map();
 let weeklyCache = null;
+let artistImageCache = new Map();
+let songCoverCache = new Map();
+
+// 24bit 自己的搜索结果封面是统一的占位黑胶，歌手榜也没有头像。补图时借用
+// 网易云公开的搜索接口：歌手搜索 type=100 能拿到 picUrl，歌曲搜索 type=1
+// 能拿到 album.picUrl。只取图片地址，不依赖它的播放地址。
+const NETEASE_SEARCH = "https://music.163.com/api/cloudsearch/pc";
+const NETEASE_REFERER = "https://music.163.com/";
+const FALLBACK_COVER =
+  "https://image-static.segmentfault.com/130/963/1309637440-6840534483727_fix732";
 
 function fail(message, code) {
   const error = new Error(message);
@@ -56,6 +66,14 @@ function fail(message, code) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function abortSignal(ms) {
+  try {
+    return AbortSignal.timeout(ms);
+  } catch (_) {
+    return undefined;
+  }
 }
 
 async function timed(promise, ms, message) {
@@ -116,6 +134,81 @@ function artistsOf(player) {
   return (names.length ? names : [String(player || "").trim()].filter(Boolean)).map(
     (name) => ({ id: "artist:" + name, name }),
   );
+}
+
+async function neteaseSearch(params) {
+  try {
+    const url =
+      NETEASE_SEARCH +
+      "?" +
+      Object.entries(params)
+        .map(([k, v]) => k + "=" + encodeURIComponent(v))
+        .join("&");
+    const ms = 5000;
+    const response = await timed(
+      fetch(url, {
+        headers: {
+          "user-agent": UA,
+          referer: NETEASE_REFERER,
+          accept: "application/json, text/plain, */*",
+        },
+        redirect: "follow",
+        signal: abortSignal(ms),
+      }),
+      ms,
+      "网易云补图接口超时",
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data && data.result ? data.result : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function httpsImage(url) {
+  return String(url || "").replace(/^http:\/\//i, "https://");
+}
+
+async function artistImage(name) {
+  const key = normalize(name);
+  if (!key) return FALLBACK_COVER;
+  const hit = artistImageCache.get(key);
+  if (hit && Date.now() - hit.at < 6 * 60 * 60 * 1000) return hit.value;
+  const result = await neteaseSearch({
+    s: name,
+    type: 100,
+    offset: 0,
+    total: "true",
+    limit: 5,
+  });
+  const list = (result && result.artists) || [];
+  const picked = list.find((item) => normalize(item.name) === key) || list[0];
+  const value = httpsImage((picked && (picked.picUrl || picked.img1v1Url)) || "") || FALLBACK_COVER;
+  artistImageCache.set(key, { value, at: Date.now() });
+  trimCache(artistImageCache, 120);
+  return value;
+}
+
+async function coverForSong(name, player) {
+  const key = normalize(name + "|" + player);
+  if (!key) return "";
+  const hit = songCoverCache.get(key);
+  if (hit && Date.now() - hit.at < 60 * 60 * 1000) return hit.value;
+  const result = await neteaseSearch({
+    s: [name, player].filter(Boolean).join(" "),
+    type: 1,
+    offset: 0,
+    total: "true",
+    limit: 3,
+  });
+  const songs = (result && result.songs) || [];
+  const picked = songs.find((item) => normalize(item.name) === normalize(name)) || songs[0];
+  const album = picked && (picked.album || picked.al);
+  const value = httpsImage((album && (album.picUrl || album.blurPicUrl)) || "");
+  songCoverCache.set(key, { value, at: Date.now() });
+  trimCache(songCoverCache, 200);
+  return value;
 }
 
 // Next.js 的 RSC 数据分成若干 self.__next_f.push([1,"..."])。先解出每段
@@ -204,7 +297,7 @@ function weeklyFromHtml(html) {
 
 async function weekly() {
   if (weeklyCache && Date.now() - weeklyCache.at < PAGE_TTL) return weeklyCache.data;
-  const html = await fetchText("/");
+  const html = await fetchText("/", { timeout: 12000, attempts: 2 });
   const data = weeklyFromHtml(html);
   if (!data.musics.length && !data.players.length) throw fail("没有从首页解析到本周榜单");
   weeklyCache = { data, at: Date.now() };
@@ -219,9 +312,11 @@ async function fetchText(path, options) {
     if (hit && Date.now() - hit.at < maxAge) return hit.html;
   }
 
+  const attempts = Math.max(1, Number((options && options.attempts) || 2));
   let lastError = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     try {
+      const ms = options && options.timeout ? options.timeout : 10000;
       const response = await timed(
         fetch(url, {
           headers: {
@@ -231,12 +326,13 @@ async function fetchText(path, options) {
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.6",
           },
           redirect: "follow",
+          signal: abortSignal(ms),
         }),
-        options && options.timeout ? options.timeout : 8000,
+        ms,
         "24bit 页面请求超时",
       );
       if (!response.ok) {
-        if ([408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 524].includes(response.status) && attempt < 2) {
+        if ([408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 524].includes(response.status) && attempt < attempts - 1) {
           await sleep(400 + attempt * 500);
           continue;
         }
@@ -244,7 +340,7 @@ async function fetchText(path, options) {
       }
       const html = await response.text();
       if (!html || html.length < 500) {
-        if (attempt < 2) {
+        if (attempt < attempts - 1) {
           await sleep(400 + attempt * 500);
           continue;
         }
@@ -255,7 +351,7 @@ async function fetchText(path, options) {
       return html;
     } catch (error) {
       lastError = error;
-      if (attempt < 2) {
+      if (attempt < attempts - 1) {
         await sleep(500 + attempt * 600);
         continue;
       }
@@ -264,11 +360,13 @@ async function fetchText(path, options) {
   throw lastError || fail("24bit 页面请求失败");
 }
 
-async function apiSearch(tier, keyword, page) {
+async function apiSearch(tier, keyword, page, options) {
   const meta = TIERS[tier] || TIERS[DEFAULT_TIER];
   const term = String(keyword || "").trim();
   if (!term) throw fail("搜索关键词不能为空");
   const p = Math.max(1, Math.floor(Number(page || 1)));
+  const attempts = Math.max(1, Number((options && options.attempts) || 2));
+  const perTry = Math.max(1000, Number((options && options.timeout) || 8000));
   const cacheKey = meta.endpoint + "|" + p + "|" + term;
   const hit = apiCache.get(cacheKey);
   if (hit && Date.now() - hit.at < API_TTL) return hit.items;
@@ -283,7 +381,7 @@ async function apiSearch(tier, keyword, page) {
     p;
 
   let lastError = null;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       const response = await timed(
         fetch(url, {
@@ -297,12 +395,13 @@ async function apiSearch(tier, keyword, page) {
           },
           body: JSON.stringify({ keyword: term, page: p }),
           redirect: "follow",
+          signal: abortSignal(perTry),
         }),
-        8000,
+        perTry,
         "24bit 搜索接口超时",
       );
       if (!response.ok) {
-        if ([408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 524].includes(response.status) && attempt < 2) {
+        if ([408, 425, 429, 500, 502, 503, 504, 520, 521, 522, 524].includes(response.status) && attempt < attempts - 1) {
           await sleep(400 + attempt * 500);
           continue;
         }
@@ -313,7 +412,7 @@ async function apiSearch(tier, keyword, page) {
       try {
         data = JSON.parse(text);
       } catch (_) {
-        if (attempt < 2) {
+        if (attempt < attempts - 1) {
           await sleep(400 + attempt * 500);
           continue;
         }
@@ -343,7 +442,7 @@ async function apiSearch(tier, keyword, page) {
       return items;
     } catch (error) {
       lastError = error;
-      if (attempt < 2) {
+      if (attempt < attempts - 1) {
         await sleep(600 + attempt * 900);
         continue;
       }
@@ -352,10 +451,10 @@ async function apiSearch(tier, keyword, page) {
   throw lastError || fail("24bit 搜索接口请求失败");
 }
 
-async function searchBoth(keyword, page) {
+async function searchBoth(keyword, page, options) {
   const results = await Promise.allSettled([
-    apiSearch("a", keyword, page),
-    apiSearch("b", keyword, page),
+    apiSearch("a", keyword, page, options),
+    apiSearch("b", keyword, page, options),
   ]);
   const groups = [];
   const errors = [];
@@ -378,9 +477,11 @@ function albumOf(item, tier) {
   };
 }
 
-function trackOf(item, tier) {
+function trackOf(item, tier, coverOverride) {
   const meta = TIERS[tier] || TIERS[DEFAULT_TIER];
   const album = albumOf(item, tier);
+  const cover = coverOverride || album.imageUrl || "";
+  album.imageUrl = cover;
   return {
     id: "track:" + meta.path + ":" + item.id,
     name: item.name,
@@ -388,7 +489,7 @@ function trackOf(item, tier) {
     album: {
       id: album.id,
       name: item.album || item.name,
-      imageUrl: album.imageUrl,
+      imageUrl: cover,
       artists: album.artists,
     },
     duration: 0,
@@ -408,24 +509,68 @@ function dedupeAlbums(items) {
   return out;
 }
 
-function chartLinks(musics) {
-  return musics.map((item) => ({
-    title: item.name,
-    subtitle: item.count ? item.count + " 次播放" : "本周上榜",
-    page: "chart:" + item.name,
-  }));
+async function chartLinks(musics) {
+  return Promise.all(
+    musics.map(async (item) => ({
+      title: item.name,
+      subtitle: item.count ? item.count + " 次播放" : "本周上榜",
+      page: "chart:" + item.name,
+      imageUrl: (await coverForSong(item.name, "")) || FALLBACK_COVER,
+    })),
+  );
 }
 
-function artistList(players) {
-  return players.map((item) => ({
-    id: "artist:" + item.name,
-    name: item.name,
-    imageUrl: "",
-  }));
+async function chartTracks(musics) {
+  const results = await Promise.allSettled(
+    musics.map(async (item) => {
+      const items = await apiSearch("b", item.name, 1, { attempts: 1, timeout: 5000 });
+      const picked = items.find((row) => normalize(row.name) === normalize(item.name)) || items[0];
+      if (!picked) return null;
+      const cover =
+        (await coverForSong(picked.name, picked.player)) || picked.cover || FALLBACK_COVER;
+      return trackOf({ ...picked, cover }, "b", cover);
+    }),
+  );
+  return results
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value);
+}
+
+async function artistList(players) {
+  return Promise.all(
+    players.map(async (item) => ({
+      id: "artist:" + item.name,
+      name: item.name,
+      imageUrl: await artistImage(item.name),
+    })),
+  );
+}
+
+async function tracksFromEntries(entries, limit) {
+  const picks = entries
+    .slice()
+    .sort((a, b) => (a.tier === "b" ? -1 : 1) - (b.tier === "b" ? -1 : 1))
+    .slice(0, limit || 12);
+  const results = await Promise.allSettled(
+    picks.map(async (entry) => {
+      const cover =
+        (await coverForSong(entry.item.name, entry.item.player)) ||
+        entry.item.cover ||
+        FALLBACK_COVER;
+      return trackOf({ ...entry.item, cover }, entry.tier, cover);
+    }),
+  );
+  return results
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value);
 }
 
 async function songPage(path, id, options) {
-  const html = await fetchText("/music/" + path + "/" + id, options);
+  const html = await fetchText("/music/" + path + "/" + id, {
+    attempts: 3,
+    timeout: 8000,
+    ...(options || {}),
+  });
   const text = rscText(html);
   let item = objectAfter(text, "itemMusic");
 
@@ -521,35 +666,16 @@ function albumsFromItems(items, tier) {
   return dedupeAlbums(items.map((item) => albumOf(item, tier)));
 }
 
-function tracksFromItems(items, tier) {
-  const seen = new Set();
-  const out = [];
-  for (const item of items) {
-    const track = trackOf(item, tier);
-    if (seen.has(track.id)) continue;
-    seen.add(track.id);
-    out.push(track);
-  }
-  return out;
-}
-
 export async function home() {
   const data = await weekly();
+  const [links, artists] = await Promise.all([chartLinks(data.musics), artistList(data.players)]);
   return {
     title: "24bit无损音乐",
     subtitle: "16bit 44.1kHz · 24bit 192kHz 母带直链",
-    description: "24bit.net 单曲站。榜单里的歌名点进去会搜索同名单曲；搜索结果可切换 16bit 与 24bit 192kHz。",
+    description: "24bit.net 单曲站。榜单封面来自同名歌曲，点进去可直接播放同名单曲。",
     sections: [
-      { title: "本周歌曲榜", links: chartLinks(data.musics), morePage: "charts", empty: "本周歌曲榜暂时为空" },
-      { title: "本周歌手榜", artists: artistList(data.players), morePage: "artists", empty: "本周歌手榜暂时为空" },
-      {
-        title: "浏览",
-        links: [
-          { title: "全部榜单", subtitle: "本周歌曲与歌手", page: "charts" },
-          { title: "全部歌手", subtitle: "按本周热度排序", page: "artists" },
-          { title: "音质与说明", subtitle: "16bit / 24bit 直链", page: "about" },
-        ],
-      },
+      { title: "本周歌曲榜", links, morePage: "charts", empty: "本周歌曲榜暂时为空" },
+      { title: "本周歌手榜", artists, morePage: "artists", empty: "本周歌手榜暂时为空" },
     ],
   };
 }
@@ -561,13 +687,18 @@ export async function browse({ page } = {}) {
 
   if (raw === "charts") {
     const data = await weekly();
+    const [tracks, artists] = await Promise.all([
+      chartTracks(data.musics),
+      artistList(data.players),
+    ]);
     return {
       title: "本周榜单",
       subtitle: "24bit.net 首页实时榜单",
       sections: [
-        { title: "本周歌曲榜", links: chartLinks(data.musics), empty: "本周歌曲榜暂时为空" },
-        { title: "本周歌手榜", artists: artistList(data.players), empty: "本周歌手榜暂时为空" },
-        { title: "返回", links: [{ title: "返回首页", page: "home" }] },
+        tracks.length
+          ? { title: "本周歌曲榜", tracks, empty: "本周歌曲榜暂时为空" }
+          : { title: "本周歌曲榜", links: await chartLinks(data.musics), empty: "本周歌曲榜暂时为空" },
+        { title: "本周歌手榜", artists, empty: "本周歌手榜暂时为空" },
       ],
     };
   }
@@ -578,8 +709,7 @@ export async function browse({ page } = {}) {
       title: "本周歌手榜",
       subtitle: data.players.length + " 位歌手",
       sections: [
-        { title: "歌手", artists: artistList(data.players), empty: "本周歌手榜暂时为空" },
-        { title: "返回", links: [{ title: "全部榜单", page: "charts" }] },
+        { title: "歌手", artists: await artistList(data.players), empty: "本周歌手榜暂时为空" },
       ],
     };
   }
@@ -593,28 +723,16 @@ export async function browse({ page } = {}) {
         "搜索结果同时列出 24bit 192kHz 与 16bit 44.1kHz；专辑名后的音质标记用于区分同名歌曲。",
         "播放地址来自单曲页内嵌的无损 FLAC 直链，带有时效票据；每次播放都会重新读取单曲页，不长期缓存旧地址。",
       ].join("\n"),
-      sections: [
-        {
-          title: "入口",
-          links: [
-            { title: "本周榜单", page: "charts" },
-            { title: "本周歌手", page: "artists" },
-            { title: "返回首页", page: "home" },
-          ],
-        },
-      ],
     };
   }
 
   if (raw.startsWith("chart:")) {
     const keyword = decodePageName(raw.slice(6)).trim();
     if (!keyword) throw fail("榜单歌曲名称为空");
-    const groups = await searchBoth(keyword, 1);
+    const groups = await searchBoth(keyword, 1, { attempts: 2, timeout: 5000 });
     const all = groups.flatMap((group) => group.items.map((item) => ({ item, tier: group.tier })));
     const wanted = normalize(keyword);
     const exact = all.filter((entry) => normalize(entry.item.name) === wanted);
-    // 首页歌曲榜来自 16bit 主链路，同名结果里先排 16bit，避免 24bit 翻唱
-    // 或现场版排到榜首歌曲前面。
     const ranked = (exact.length ? exact : all).slice();
     ranked.sort((a, b) => {
       if (a.tier === b.tier) return 0;
@@ -622,29 +740,19 @@ export async function browse({ page } = {}) {
       if (b.tier === "b") return 1;
       return 0;
     });
-    const picks = ranked.slice(0, 24);
-    const albums = [];
-    const seen = new Set();
-    for (const entry of picks) {
-      const album = albumOf(entry.item, entry.tier);
-      if (seen.has(album.id)) continue;
-      seen.add(album.id);
-      albums.push(album);
-    }
+    const tracks = await tracksFromEntries(ranked, 24);
     return {
       title: "本周歌曲 · " + keyword,
-      subtitle: albums.length + " 个同名单曲",
-      sections: [
-        { title: "同名单曲", albums, empty: "没有找到同名单曲" },
-        { title: "返回", links: [{ title: "返回榜单", page: "charts" }] },
-      ],
+      subtitle: tracks.length + " 首可播放单曲",
+      imageUrl: tracks[0] ? tracks[0].album.imageUrl : "",
+      sections: [{ title: "同名单曲", tracks, empty: "没有找到同名单曲" }],
     };
   }
 
   if (raw.startsWith("artist:")) {
     const name = decodePageName(raw.slice(7)).trim();
     if (!name) throw fail("歌手名称为空");
-    const groups = await searchBoth(name, 1);
+    const groups = await searchBoth(name, 1, { attempts: 2, timeout: 5000 });
     const wanted = normalize(name);
     const filtered = groups.flatMap((group) => {
       const matched = group.items.filter(
@@ -652,37 +760,26 @@ export async function browse({ page } = {}) {
       );
       return (matched.length ? matched : group.items).map((item) => ({ item, tier: group.tier }));
     });
-    const albums = [];
-    const seen = new Set();
-    for (const entry of filtered.slice(0, 40)) {
-      const album = albumOf(entry.item, entry.tier);
-      if (seen.has(album.id)) continue;
-      seen.add(album.id);
-      albums.push(album);
-    }
-    const bGroup = groups.find((group) => group.tier === "b");
-    const tracks = bGroup
-      ? tracksFromItems(
-          bGroup.items.filter(
-            (item) => normalize(item.player).includes(wanted) || normalize(item.name).includes(wanted),
-          ),
-          "b",
-        ).slice(0, 10)
-      : [];
+    const tracks = await tracksFromEntries(filtered, 24);
     return {
       title: name,
-      subtitle: albums.length + " 首单曲",
-      imageUrl: albums[0] ? albums[0].imageUrl : "",
+      subtitle: tracks.length + " 首可播放单曲",
+      imageUrl: await artistImage(name),
       description: "按歌手名站内搜索；同一首歌可能同时有 16bit 与 24bit 版本。",
-      sections: [
-        { title: "单曲", albums, empty: "没有找到这位歌手的单曲" },
-        { title: "热门歌曲", tracks, empty: "没有可展示的歌曲" },
-        { title: "返回", links: [{ title: "本周歌手榜", page: "artists" }] },
-      ],
+      sections: [{ title: "热门歌曲", tracks, empty: "没有找到这位歌手的单曲" }],
     };
   }
 
   throw fail("未知页面：" + raw);
+}
+
+async function fillCovers(entries) {
+  return Promise.all(
+    entries.map(async (entry) => {
+      const cover = await coverForSong(entry.item.name, entry.item.player);
+      return cover ? { ...entry, item: { ...entry.item, cover } } : entry;
+    }),
+  );
 }
 
 export async function search({ query, kind, offset } = {}) {
@@ -690,8 +787,9 @@ export async function search({ query, kind, offset } = {}) {
   if (!term) throw fail("搜索关键词不能为空");
   const page = Math.max(1, Math.floor(Number(offset || 0) / PAGE_SIZE) + 1);
   const groups = await searchBoth(term, page);
-  const entries = groups.flatMap((group) => group.items.map((item) => ({ item, tier: group.tier })));
+  let entries = groups.flatMap((group) => group.items.map((item) => ({ item, tier: group.tier })));
   const more = groups.some((group) => group.items.length >= PAGE_SIZE);
+  if (kind === "tracks" || kind === "albums") entries = await fillCovers(entries);
 
   if (kind === "tracks") {
     const tracks = [];

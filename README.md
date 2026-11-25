@@ -39,7 +39,7 @@
 | 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
 | 26 | [番茄音乐](plugins/fanqie-music/) | [www.novelfm.com](https://www.novelfm.com/) | `fanqie-music` | 1.0.0 | 能，SSR 歌曲页取 m4a 直链（206），返回音频大小；网页版无搜索接口，搜索为首页 200 首本地匹配 |
 | 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.0 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中 |
-| 28 | [24bit无损音乐](plugins/24bit/) | [www.24bit.net](https://www.24bit.net/) | `24bit` | 1.0.0 | 能，首页榜单实时解析；搜索同时列 16bit 44.1kHz 与 24bit 192kHz，单曲页取 FLAC 直链（16bit 实测 `audio/x-flac`，24bit 文件头 `fLaC`）；24bit 96kHz 接口不稳定，未作主链路 |
+| 28 | [24bit无损音乐](plugins/24bit/) | [www.24bit.net](https://www.24bit.net/) | `24bit` | 1.0.1 | 能，首页榜单实时解析并补全歌曲/歌手封面；榜单页可直接播放解析出的单曲，搜索同时列 16bit 44.1kHz 与 24bit 192kHz，单曲页取 FLAC 直链；24bit 96kHz 接口不稳定，未作主链路 |
 
 ### DJ音乐（2 个）
 
@@ -178,7 +178,7 @@ Jusic 听歌房（未开源前端 + `Jusic-Serve-Houses` 后端），内容全�
 
 ### 24bit无损音乐（24bit）
 
-站点：https://www.24bit.net/。单曲站，一个搜索结果就是一首歌，没有真正的专辑目录；插件把一首单曲当作一张一首曲目的专辑，专辑名后附带音质。首页解析 RSC 里的 `weekData` 做「本周歌曲榜」「本周歌手榜」，歌曲榜点进去按歌名搜索同名单曲，歌手榜点进去按歌手名搜索。搜索并行请求 `searchOnlineMusicTwo`（16bit，每页 30 条）与 `searchOnlineMusicOne`（24bit 192kHz，每页 30 条），两接口偶发 503，插件做退避重试。单曲页 `/music/b|a|c/<id>` 内嵌 `itemMusic`，`stream()` 取其中的 FLAC 直链；16bit 与 24bit 都实测可播，歌词优先读 `itemMusic.lrc`，16bit 的 `$c` 占位则从同页另一段 RSC 字符串提取。24bit 96kHz 的 `searchOnlineMusicThree` 不稳定，当前主链路只用 192kHz。
+站点：https://www.24bit.net/。单曲站，一个搜索结果就是一首歌，没有真正的专辑目录；插件把一首单曲当作一张一首曲目的专辑，专辑名后附带音质。首页解析 RSC 里的 `weekData` 做「本周歌曲榜」「本周歌手榜」；歌曲与歌手封面通过网易云公开搜索接口按同名歌曲/歌手补全，失败时回退站点占位图。榜单页会把本周歌曲并发解析成可直接播放的单曲，站点搜索接口 503 时少展示几首；歌手页与歌曲页都直接返回可播放曲目，不再放没有内容的「返回」卡片。搜索并行请求 `searchOnlineMusicTwo`（16bit，每页 30 条）与 `searchOnlineMusicOne`（24bit 192kHz，每页 30 条），两接口偶发 503，插件做退避重试。单曲页 `/music/b|a|c/<id>` 内嵌 `itemMusic`，`stream()` 取其中的 FLAC 直链；16bit 与 24bit 都实测可播，歌词优先读 `itemMusic.lrc`，16bit 的 `$c` 占位则从同页另一段 RSC 字符串提取。24bit 96kHz 的 `searchOnlineMusicThree` 不稳定，当前主链路只用 192kHz。
 
 ## DJ音乐
 
