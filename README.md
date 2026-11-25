@@ -27,12 +27,12 @@
 | 13 | [无名音乐](plugins/mvmp3/) | [www.mvmp3.com](https://www.mvmp3.com/) | `mvmp3` | 1.0.0 | 能，MP3 + LRC |
 | 14 | [小蜜蜂音乐](plugins/xmfwav/) | [www.xmfwav.com](https://www.xmfwav.com/) | `xmfwav` | 1.0.1 | 能，优先网易云 MP3，首页是榜单式布局 |
 | 15 | [VY音乐](plugins/yyvy/) | [www.yyvy.cn](https://www.yyvy.cn/) | `yyvy` | 1.0.0 | 能，原创与榜单 |
-| 16 | [听听网](plugins/tingting/) | [www.ttw.cx](https://www.ttw.cx/) | `tingting` | 1.0.1 | 能，绕过 PHP session 校验，借酷我直链 |
+| 16 | [听听网](plugins/tingting/) | [www.ttw.cx](https://www.ttw.cx/) | `tingting` | 1.0.2 | 修复歌单 `owner` 字段类型；绕过 PHP session 校验，借酷我直链 |
 | 17 | [九天音乐](plugins/nine-sky/) | [www.9sky.com](https://www.9sky.com/) | `nine-sky` | 1.0.1 | 能，MP3 + 批量封面 |
 | 18 | [布谷音乐](plugins/buguyy-music/) | [www.buguyy.top](https://www.buguyy.top/) | `buguyy-music` | 1.0.0 | 能，320kbps MP3 直链 |
 | 19 | [一起听歌吧](plugins/jusic-room/) | [happy.alang.run](https://happy.alang.run/) | `jusic-room` | 1.0.0 | 跟随房间，正在播放与队列能播，搜索只有元数据 |
 | 20 | [糖豆音乐](plugins/tangdou/) | [www.tangdou.com/music](https://www.tangdou.com/music/) | `tangdou` | 0.1.0 | 能，MP3 直链；搜索为本地遍历匹配 |
-| 21 | [广场舞地盘](plugins/gcwdp/) | [www.gcwdp.com](https://www.gcwdp.com/) | `gcwdp` | 1.0.0 | 能，试听地址现取（auth_key 十来分钟过期），站点 GB2312 无 JSON 接口 |
+| 21 | [广场舞地盘](plugins/gcwdp/) | [www.gcwdp.com](https://www.gcwdp.com/) | `gcwdp` | 1.0.2 | 修复舞曲库 `owner` 字段类型，补齐歌单详情 `playlist()`；试听地址现取（auth_key 十来分钟过期），站点 GB2312 无 JSON 接口 |
 | 22 | [IN音乐网](plugins/inmp3/) | [inmp3.com](https://inmp3.com/) | `inmp3` | 0.1.0 | 能，详情页 base64 解出酷我 MP3 直链，实测 4.3MB、Range 206 |
 | 23 | [放屁网](plugins/fangpiw/) | [www.fangpiw.com](https://www.fangpiw.com/) | `fangpiw` | 0.1.0 | 能出声，但播放接口给的是 `audition/` 试听片段（实测不足 1MB），不是整曲 |
 | 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |

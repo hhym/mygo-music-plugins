@@ -216,7 +216,7 @@ function parseAlbumCards(html) {
     const id = m[1]
     if (seen.has(id)) continue
     seen.add(id)
-    out.push({ id: "a:" + id, name: cleanTag(m[2]), imageUrl: "", owner: { name: "广场舞地盘" } })
+    out.push({ id: "a:" + id, name: cleanTag(m[2]), imageUrl: "", owner: "广场舞地盘" })
   }
   return out
 }
@@ -432,11 +432,7 @@ export async function artist({ id }) {
 
 /* ---------------- 专辑（舞曲库的文件夹） ---------------- */
 
-export async function album({ id }) {
-  const raw = String(id || "")
-  const num = raw.startsWith("a:") ? raw.slice(2) : raw
-  if (!/^\d+$/.test(num)) throw fail("notfound", t("这张专辑不存在"))
-
+async function readAlbum(num) {
   const html = await get(`/html/${num}_1.html`)
   const tracks = parseItems(html, num)
   if (!tracks.length) throw fail("notfound", t("这张专辑是空的"))
@@ -447,17 +443,41 @@ export async function album({ id }) {
   )
   const first = tracks[0]
   const who = first.artists[0] ? first.artists[0].name : ""
+  return { name: name || first.name, imageUrl: first.album.imageUrl, who, tracks }
+}
+
+function albumNumber(raw) {
+  const num = String(raw || "").startsWith("a:") ? String(raw || "").slice(2) : String(raw || "")
+  if (!/^\d+$/.test(num)) throw fail("notfound", t("这张专辑不存在"))
+  return num
+}
+
+export async function album({ id }) {
+  const num = albumNumber(id)
+  const meta = await readAlbum(num)
 
   return {
-    title: name || first.name,
-    subtitle: t("这首歌各个舞队的版本"),
     album: {
       id: "a:" + num,
-      name: name || first.name,
-      imageUrl: first.album.imageUrl,
-      artists: who ? [{ id: "n:" + who, name: who }] : [],
+      name: meta.name,
+      imageUrl: meta.imageUrl,
+      artists: meta.who ? [{ id: "n:" + meta.who, name: meta.who }] : [],
     },
-    sections: [{ title: name || first.name, tracks, pageTitle: name || first.name }],
+    tracks: meta.tracks,
+  }
+}
+
+export async function playlist({ id }) {
+  const num = albumNumber(id)
+  const meta = await readAlbum(num)
+
+  return {
+    id: "a:" + num,
+    name: meta.name,
+    imageUrl: meta.imageUrl,
+    owner: "广场舞地盘",
+    trackCount: meta.tracks.length,
+    tracks: meta.tracks,
   }
 }
 

@@ -356,7 +356,7 @@ export async function home() {
         id: "playlist:" + p.id,
         name: p.name,
         imageUrl: p.imageUrl,
-        owner: { name: "听听网" },
+        owner: "听听网",
       })),
       morePage: "playtype/index.html",
       pageTitle: t("推荐歌单"),
@@ -470,7 +470,7 @@ export async function browse({ page }) {
             id: "playlist:" + p.id,
             name: p.name,
             imageUrl: p.imageUrl,
-            owner: { name: "听听网" },
+            owner: "听听网",
           })),
           pageTitle: t("歌单"),
           empty: !cards.length,
@@ -651,6 +651,25 @@ export async function album({ id }) {
       released: meta.released,
     },
     tracks: parseTracks(html),
+  }
+}
+
+export async function playlist({ id }) {
+  const raw = String(id || "")
+  const clean = raw.replace(/^playlist:/, "").replace(/^playlist\//, "").replace(/\.html$/, "")
+  const html = await request(`${BASE}/playlist/${encodeURIComponent(clean)}.html`)
+  const meta = playlistMeta(html, clean)
+  if (!meta.name) throw new PluginError("unavailable", t("这个歌单在听听网上找不到了"))
+  const tracks = parseTracks(html)
+
+  return {
+    id: meta.id,
+    name: meta.name,
+    imageUrl: meta.imageUrl,
+    description: meta.description,
+    owner: "听听网",
+    trackCount: meta.trackCount || tracks.length,
+    tracks,
   }
 }
 
