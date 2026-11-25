@@ -565,6 +565,25 @@ async function tracksFromEntries(entries, limit) {
     .map((result) => result.value);
 }
 
+async function albumGridFromEntries(entries, limit) {
+  const picks = entries
+    .slice()
+    .sort((a, b) => (a.tier === "b" ? -1 : 1) - (b.tier === "b" ? -1 : 1))
+    .slice(0, limit || 12);
+  const results = await Promise.allSettled(
+    picks.map(async (entry) => {
+      const cover =
+        (await coverForSong(entry.item.name, entry.item.player)) ||
+        entry.item.cover ||
+        FALLBACK_COVER;
+      return albumOf({ ...entry.item, cover }, entry.tier);
+    }),
+  );
+  return dedupeAlbums(
+    results.filter((result) => result.status === "fulfilled" && result.value).map((result) => result.value),
+  );
+}
+
 async function songPage(path, id, options) {
   const html = await fetchText("/music/" + path + "/" + id, {
     attempts: 3,
@@ -757,12 +776,12 @@ export async function browse({ page } = {}) {
       if (b.tier === "b") return 1;
       return 0;
     });
-    const tracks = await tracksFromEntries(ranked, 24);
+    const albums = await albumGridFromEntries(ranked, 24);
     return {
       title: "本周歌曲 · " + keyword,
-      subtitle: tracks.length + " 首可播放单曲",
-      imageUrl: tracks[0] ? tracks[0].album.imageUrl : "",
-      sections: [{ title: "同名单曲", tracks, empty: "没有找到同名单曲" }],
+      subtitle: albums.length + " 个同名单曲",
+      imageUrl: albums[0] ? albums[0].imageUrl : "",
+      sections: [{ title: "同名单曲", albums, empty: "没有找到同名单曲" }],
     };
   }
 
