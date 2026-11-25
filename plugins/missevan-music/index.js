@@ -513,12 +513,18 @@ function qtCore(name) {
 }
 
 function qtScore(a, b) {
-  const left = [...qtCore(a)];
-  const right = new Set([...qtCore(b)]);
-  if (!left.length || !right.size) return 0;
+  const left = qtCore(a);
+  const right = qtCore(b);
+  if (!left || !right) return 0;
+  /* A short name sitting inside a longer title is the same book far more often
+     than a coincidental character overlap — "盗墓笔记" inside "盗墓笔记 蛇沼鬼城
+     第一集" should win over "北派盗墓笔记", which merely shares four characters. */
+  if (left.includes(right) || right.includes(left)) return 0.6;
+  const leftSet = [...left];
+  const rightSet = new Set([...right]);
   let hit = 0;
-  for (const ch of left) if (right.has(ch)) hit++;
-  return hit / Math.max(left.length, right.size);
+  for (const ch of leftSet) if (rightSet.has(ch)) hit++;
+  return hit / Math.max(leftSet.length, rightSet.size);
 }
 
 async function qtJson(url) {
@@ -560,7 +566,14 @@ async function qtChannelEpisode(chid) {
   const free = programs.filter(
     (item) => item.isFree === true || item.saleStatus === "free" || Number(item.fee) === 0,
   );
-  const first = (free.length ? free : programs)[0];
+  /* The first free item is often a trailer ("片花"), which is 40 seconds of
+     nothing. Skip those and start from the earliest real episode. */
+  const junk = /片花|预告|试听|花絮|主题曲|宣传|福利|彩蛋|先导/;
+  const picks = free.length ? free : programs;
+  const clean = picks.filter((item) => !junk.test(String(item.title || "")));
+  const pool = (clean.length ? clean : picks).slice();
+  pool.sort((a, b) => Number(a.programId || 0) - Number(b.programId || 0));
+  const first = pool[0];
   if (!first) return null;
   return qtEpisode(chid, first.programId, first.title || "");
 }
@@ -574,7 +587,7 @@ async function qtByName(name) {
   const docs = (((body || {}).data || {}).data || {}).docs || [];
   for (const doc of docs) {
     if (!doc || !doc.id) continue;
-    if (qtScore(doc.title || "", keyword) < 0.3) continue;
+    if (qtScore(doc.title || "", keyword) < 0.4) continue;
     const type = String(doc.type || "");
     if (type.includes("channel")) {
       const hit = await qtChannelEpisode(doc.id);

@@ -52,7 +52,7 @@
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.1.0 | 音单能，单曲是 Widevine 加密 HLS；可选蜻蜓FM 同名回退（默认关） |
+| 1 | [猫耳FM](plugins/missevan-music/) | [www.missevan.com](https://www.missevan.com/) | `missevan-music` | 1.1.1 | 音单能，单曲是 Widevine 加密 HLS；可选蜻蜓FM 同名回退（默认关） |
 | 2 | [听书网](plugins/tingshuwang-music/) | [www.tingshuwang.cc](https://www.tingshuwang.cc/) | `tingshuwang-music` | 1.0.0 | 能，章节明文直链 |
 | 3 | [恋听网](plugins/ting55/) | [ting55.com](https://ting55.com/) | `ting55` | 1.0.0 | 能，章节 token 换 MP3；云主机出口偶尔回 503 |
 | 4 | [275听书](plugins/i275/) | [m.i275.com](https://m.i275.com) | `i275` | 0.1.1 | 能，播放页被服务端 302，走蜻蜓 FM 兜底 |
