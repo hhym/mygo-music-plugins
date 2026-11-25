@@ -19,5 +19,9 @@
   "这个歌单在听听网上找不到了": "This playlist is gone from TingTing",
   "这张专辑在听听网上找不到了": "This album is gone from TingTing",
   "听听网排行榜，持续播放": "TingTing charts, continuous play",
-  "不支持的榜单": "Unsupported chart"
+  "不支持的榜单": "Unsupported chart",
+  "暂无曲目": "No tracks yet",
+  "暂无歌手": "No artists yet",
+  "暂无歌单": "No playlists yet",
+  "暂无专辑": "No albums yet"
 }

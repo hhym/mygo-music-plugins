@@ -100,6 +100,70 @@ async function get(path, extra) {
   return decodeBytes(new Uint8Array(buf))
 }
 
+function readU32(bytes, offset) {
+  return (bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3]
+}
+
+function asciiAt(bytes, offset, marker) {
+  for (let i = offset; i <= bytes.length - marker.length; i += 1) {
+    let match = true
+    for (let j = 0; j < marker.length; j += 1) {
+      if (bytes[i + j] !== marker.charCodeAt(j)) {
+        match = false
+        break
+      }
+    }
+    if (match) return i
+  }
+  return -1
+}
+
+// 只读音频开头的 Xing/Info VBR 帧表；不下载整曲，也不依赖播放器元数据。
+function mp3DurationMs(bytes) {
+  let offset = 0
+  if (bytes.length > 10 && bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
+    const size =
+      ((bytes[6] & 0x7f) << 21) | ((bytes[7] & 0x7f) << 14) | ((bytes[8] & 0x7f) << 7) | (bytes[9] & 0x7f)
+    offset = 10 + size
+  }
+  while (offset + 4 <= bytes.length) {
+    if (bytes[offset] === 0xff && (bytes[offset + 1] & 0xe0) === 0xe0) break
+    offset += 1
+  }
+  if (offset + 4 > bytes.length) return 0
+
+  const version = (bytes[offset + 1] >> 3) & 3
+  const layer = (bytes[offset + 1] >> 1) & 3
+  if (version === 0 || layer === 0) return 0
+
+  const rateIndex = (bytes[offset + 2] >> 2) & 3
+  const rates =
+    version === 3 ? [44100, 48000, 32000] : version === 2 ? [22050, 24000, 16000] : [11025, 12000, 8000]
+  const sampleRate = rates[rateIndex]
+  if (!sampleRate) return 0
+
+  const framesPerFrame = version === 3 ? 1152 : 576
+  const tagAt = Math.max(
+    asciiAt(bytes, offset + 4, "Xing"),
+    asciiAt(bytes, offset + 4, "Info")
+  )
+  if (tagAt < 0 || tagAt + 12 >= bytes.length) return 0
+
+  const flags = readU32(bytes, tagAt + 4)
+  if (!(flags & 1)) return 0
+  const frames = readU32(bytes, tagAt + 8)
+  if (!frames) return 0
+  return Math.round((frames * framesPerFrame * 1000) / sampleRate)
+}
+
+async function mapLimit(items, limit, fn) {
+  const queue = [...items]
+  const workers = Array.from({ length: Math.min(limit, queue.length) }, async () => {
+    while (queue.length) await fn(queue.shift())
+  })
+  return Promise.all(workers)
+}
+
 /* ---------------- 文本工具 ---------------- */
 
 const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " }
@@ -246,6 +310,7 @@ async function channelPage(slug, page) {
   const ch = CHANNELS.find((c) => c.slug === slug)
   const html = await get(channelPath(slug, page))
   const tracks = parseItems(html)
+  await enrichDurations(tracks)
   const total = totalPages(html)
   return {
     title: t(ch.title),
@@ -255,7 +320,7 @@ async function channelPage(slug, page) {
         tracks,
         pageTitle: t(ch.title),
         morePage: page < total ? `${slug}/${page + 1}` : undefined,
-        empty: !tracks.length,
+        empty: tracks.length ? "" : t("暂无曲目"),
       },
     ],
   }
@@ -324,6 +389,8 @@ export async function home() {
     })
   }
 
+  await Promise.all([newest, freeList, ballList, lightList].map((list) => enrichDurations(list, 8)))
+
   sections.push({
     title: t("频道"),
     links: CHANNELS.map((c) => ({ title: t(c.title), page: c.slug })),
@@ -355,7 +422,7 @@ export async function browse({ page }) {
     return {
       title: t("舞曲库"),
       subtitle: t("一首歌一个文件夹，点进去是各个舞队的版本"),
-      sections: [{ title: t("舞曲库"), playlists: albums, pageTitle: t("舞曲库"), empty: !albums.length }],
+      sections: [{ title: t("舞曲库"), playlists: albums, pageTitle: t("舞曲库"), empty: albums.length ? "" : t("暂无歌单") }],
     }
   }
 
@@ -383,6 +450,7 @@ export async function search({ query, kind, offset }) {
     `/plus/search.php?keyword=${encodeGbk(text)}&searchtype=titlekeyword&pagesize=${PER_PAGE}&PageNo=${page}`
   )
   const tracks = parseItems(html)
+  await enrichDurations(tracks)
   const total = totalPages(html)
 
   if (key === "artists") {
@@ -436,6 +504,7 @@ async function readAlbum(num) {
   const html = await get(`/html/${num}_1.html`)
   const tracks = parseItems(html, num)
   if (!tracks.length) throw fail("notfound", t("这张专辑是空的"))
+  await enrichDurations(tracks)
 
   const h1 = (/<h1>([\s\S]*?)<\/h1>/.exec(html) || [])[1] || ""
   const name = cleanTag(
@@ -490,15 +559,12 @@ export async function lyrics({ id }) {
 /* ---------------- 播放 ---------------- */
 
 const URL_CACHE = new Map()
+const DURATION_CACHE = new Map()
 const URL_TTL = 120 * 1000
 
-export async function stream({ id }) {
-  const raw = String(id || "")
-  const aid = raw.startsWith("m:") ? raw.slice(2) : raw
-  if (!/^\d+$/.test(aid)) throw fail("notfound", t("这首歌不存在"))
-
+async function resolveAudioUrl(aid) {
   const cached = URL_CACHE.get(aid)
-  if (cached && Date.now() - cached.at < URL_TTL) return { url: cached.url, type: "mp3" }
+  if (cached && Date.now() - cached.at < URL_TTL) return cached.url
 
   let html
   try {
@@ -513,5 +579,40 @@ export async function stream({ id }) {
   if (!/^https:\/\//i.test(url)) throw fail("unavailable", t("这首歌没有试听地址"))
 
   URL_CACHE.set(aid, { url, at: Date.now() })
+  return url
+}
+
+async function audioDurationMs(aid) {
+  if (DURATION_CACHE.has(aid)) return DURATION_CACHE.get(aid)
+  let ms = 0
+  try {
+    const url = await resolveAudioUrl(aid)
+    const res = await fetch(url, {
+      headers: { referer: BASE + "/", range: "bytes=0-32767" },
+    })
+    if (res.ok) ms = mp3DurationMs(new Uint8Array(await res.arrayBuffer()))
+  } catch (e) {
+    ms = 0
+  }
+  DURATION_CACHE.set(aid, ms)
+  return ms
+}
+
+async function enrichDurations(tracks, limit = PER_PAGE) {
+  const slice = tracks.slice(0, limit)
+  await mapLimit(slice, 3, async (track) => {
+    const aid = String(track.id || "").slice(2)
+    if (!aid) return
+    const ms = await audioDurationMs(aid)
+    if (ms > 0) track.duration = ms
+  })
+}
+
+export async function stream({ id }) {
+  const raw = String(id || "")
+  const aid = raw.startsWith("m:") ? raw.slice(2) : raw
+  if (!/^\d+$/.test(aid)) throw fail("notfound", t("这首歌不存在"))
+
+  const url = await resolveAudioUrl(aid)
   return { url, type: "mp3" }
 }

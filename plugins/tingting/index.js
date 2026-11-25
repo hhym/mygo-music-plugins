@@ -344,7 +344,7 @@ export async function home() {
       tracks: parseTracks(fresh),
       morePage: "list/new.html",
       pageTitle: t("新歌排行"),
-      empty: !parseTracks(fresh).length,
+      empty: parseTracks(fresh).length ? "" : t("暂无曲目"),
     })
   }
 
@@ -408,7 +408,7 @@ function tracksSection(title, html, basePath, page) {
         tracks,
         morePage: more ? `${basePath}/${page + 1}.html` : undefined,
         pageTitle: title,
-        empty: !tracks.length,
+        empty: tracks.length ? "" : t("暂无曲目"),
       },
     ],
   }
@@ -443,7 +443,7 @@ export async function browse({ page }) {
     const artists = parseArtistCards(html)
     return {
       title: t("推荐歌手"),
-      sections: [{ title: t("推荐歌手"), artists, pageTitle: t("推荐歌手"), empty: !artists.length }],
+      sections: [{ title: t("推荐歌手"), artists, pageTitle: t("推荐歌手"), empty: artists.length ? "" : t("暂无歌手") }],
     }
   }
 
@@ -458,7 +458,7 @@ export async function browse({ page }) {
         title: meta.name,
         subtitle: meta.description,
         imageUrl: meta.imageUrl,
-        sections: [{ title: meta.name, tracks, pageTitle: meta.name, empty: !tracks.length }],
+        sections: [{ title: meta.name, tracks, pageTitle: meta.name, empty: tracks.length ? "" : t("暂无曲目") }],
       }
     }
     return {
@@ -473,7 +473,7 @@ export async function browse({ page }) {
             owner: "听听网",
           })),
           pageTitle: t("歌单"),
-          empty: !cards.length,
+          empty: cards.length ? "" : t("暂无歌单"),
         },
       ],
     }
@@ -484,7 +484,7 @@ export async function browse({ page }) {
     const albums = parseAlbumCards(html)
     return {
       title: t("新碟"),
-      sections: [{ title: t("新碟"), albums, pageTitle: t("新碟"), empty: !albums.length }],
+      sections: [{ title: t("新碟"), albums, pageTitle: t("新碟"), empty: albums.length ? "" : t("暂无专辑") }],
     }
   }
 
