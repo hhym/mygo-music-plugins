@@ -393,12 +393,12 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 - 收藏 / 最近播放在聚合层统一存一份（`lib.liked` / `lib.recent` / `lib.tracks`），跨源可见
 - `permissions.network` 合并了 180 个域名（含分发图标用的 `cdn.jsdelivr.net`），`permissions.process` 合并了 ffmpeg 相关二进制，`settings` 共 25 项且 key 带源前缀（如 `85ting.transcode`）
 - 源没返回 `size` 时，聚合层补一次 `range: bytes=0-1` 探测，进度条照样有总时长（HLS 跳过）
-- 源列表与分类入口统一挂葫芦图标（`assets/hulu-music-v2.png` 192×192，经 jsdelivr 分发），源自己没 logo 时不再是一片空白；插件页卡片的 `icon.png` 用同一张
+- 源列表、分类入口统一挂葫芦图标（`assets/hulu-music-v3.png` 192×192，经 jsdelivr 分发）；源的 track / link / album / artist / playlist 没带 `imageUrl` 时，聚合层在 `wrapTrack`、`wrapLink` 里兜同一张图，曲目行也不再是空白音符；插件页卡片的 `icon.png` 用同一张
 
 源有增删改后重新生成：
 
 ```bash
-node tools/build-allinone.mjs --icon assets/hulu-music-v2.png   # 输出到 allinone/，icon.png 一起带上
+node tools/build-allinone.mjs --icon assets/hulu-music-v3.png   # 输出到 allinone/，icon.png 一起带上
 node --check allinone/index.js
 node scripts/probe-one.mjs allinone
 ```
@@ -408,6 +408,6 @@ node scripts/probe-one.mjs allinone
 打包发版：
 
 ```bash
-cd allinone && zip -q -r ../dist/allinone-music-1.0.3.zip plugin.json index.js README.md icon.png locales && cd ..
-gh release create allinone-music-v1.0.3 -R hhym/mygo-music-plugins dist/allinone-music-1.0.3.zip --title "聚合音源 1.0.3：空白图标换成霓虹葫芦" --notes ...
+cd allinone && zip -q -r ../dist/allinone-music-1.0.4.zip plugin.json index.js README.md icon.png locales && cd ..
+gh release create allinone-music-v1.0.4 -R hhym/mygo-music-plugins dist/allinone-music-1.0.4.zip --title "聚合音源 1.0.4：空白图标与曲目封面统一葫芦" --notes ...
 ```
