@@ -237,6 +237,7 @@ function buildManifest(sources, meta) {
     version: meta.version,
     minAppVersion: "0.1.20",
     main: "index.js",
+    ...(meta.icon ? { icon: "icon.png" } : {}),
     playback: "stream",
     description:
       "把 " + sources.length + " 个单站插件合进一个：音乐 / DJ / 听书 / 评书四类，收藏与最近播放在一处。",
@@ -349,6 +350,7 @@ const META = {
   id: opt("id", "allinone-music"),
   name: opt("name", "MyGo 聚合音源"),
   version: opt("version", "1.0.0"),
+  icon: opt("icon", ""),
 };
 const manifest = buildManifest(sources, META);
 const locales = buildLocales(sources);
@@ -359,6 +361,7 @@ fs.writeFileSync(path.join(OUT, "index.js"), index);
 fs.writeFileSync(path.join(OUT, "plugin.json"), JSON.stringify(manifest, null, 2) + "\n");
 fs.writeFileSync(path.join(OUT, "locales", "zh-CN.json"), JSON.stringify(locales, null, 2) + "\n");
 fs.writeFileSync(path.join(OUT, "README.md"), readme + "\n");
+if (META.icon) fs.copyFileSync(path.resolve(ROOT, META.icon), path.join(OUT, "icon.png"));
 
 console.log(
   `聚合 ${sources.length} 个源 → ${path.relative(ROOT, OUT)}/  index.js ${(index.length / 1024).toFixed(
