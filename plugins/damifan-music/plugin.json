@@ -2,7 +2,7 @@
   "id": "damifan-music",
   "name": "大米饭",
   "description": "大米饭的推荐、随机、标签、歌单与搜索，曲库上万首，320kbps mp3 直接播放。",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",

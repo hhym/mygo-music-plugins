@@ -636,9 +636,47 @@ async function resolveUrl(id) {
   return value;
 }
 
+/* 播放器要靠音频总大小算时长，否则进度条永远是 0:00 / 0:00。
+   拿一个 2 字节的 Range 请求，总长度在 content-range 里。 */
+const sizeCache = new Map();
+
+async function audioSize(url) {
+  const cached = sizeCache.get(url);
+  if (cached && Date.now() - cached.at < 30 * 60 * 1000) return cached.size;
+
+  let size = 0;
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  try {
+    const headers = Object.assign({}, HEAD, { range: "bytes=0-1" });
+    const init = { headers: headers };
+    if (controller) init.signal = controller.signal;
+    const res = await deadline(fetch(url, init), 6000, url);
+    const range = res.headers.get("content-range") || "";
+    const total = Number((range.match(/\/\s*(\d+)/) || [])[1]);
+    const length = Number(res.headers.get("content-length")) || 0;
+    // Range 命中时 content-length 只有 2 字节，总大小看 content-range
+    size = total > 0 ? total : res.status === 200 ? length : 0;
+    if (res.body && typeof res.body.cancel === "function") {
+      try {
+        res.body.cancel();
+      } catch (error) {
+        // 忽略
+      }
+    }
+  } catch (error) {
+    if (controller) controller.abort();
+    size = 0;
+  }
+
+  sizeCache.set(url, { at: Date.now(), size: size });
+  if (sizeCache.size > 200) sizeCache.delete(sizeCache.keys().next().value);
+  return size;
+}
+
 export async function stream({ id }) {
   const info = await resolveUrl(String(id));
-  return { url: info.url, type: audioType(info.url) };
+  const size = await audioSize(info.url);
+  return { url: info.url, type: audioType(info.url), size: size > 0 ? size : undefined };
 }
 
 export async function lyrics({ id }) {

@@ -3,7 +3,7 @@
 把「大米饭」App（`damifan.apk`）接进 MyGo Music：个性化推荐、随机精选、标签分类、歌单广场、搜索，320kbps mp3 由 App 直接播放。
 
 - 插件 id：`damifan-music`
-- 版本：0.1.0（`minAppVersion` 0.1.20）
+- 版本：0.1.1（`minAppVersion` 0.1.20）
 - 播放方式：`stream`（App 自己取流）
 
 ## 路径是怎么解析出来的
@@ -53,6 +53,8 @@
 2. 不成就拿曲名 + 歌手去**同一家**的 `www.buguyy.top/api/search?keyword=` 匹配，取它的 `geturl`。那边的 `id` 是 base64 的自家 rid，`geturl` 直接吐 `car-*.kuwo.cn` 直链，裸请求 `206 audio/mpeg`。实测 10 首随机曲目 **10/10 命中且能播**，唱片库是同一批。
 
 匹配规则：曲名完全相同 +60，前后缀包含 +40 / +25，歌手任一段命中 +8；如果候选是「伴奏 / 纯享 / 片段 / live」而原曲不是，扣 10 分。
+
+取到地址后再打一个 `range: bytes=0-1` 的探测，从 `content-range` 里读音频总大小，随 `stream()` 一起返回给应用 —— 这样播放器的进度条才有总时长，不然只会停在 `0:00 / 0:00`。大小缓存 30 分钟，同一首歌重复点播不多打一次请求。
 
 `api/geturl` 之外还试过 `www.buguyy.top/api/geturl?id=<明文 rid 的 base64>`，返回「无法获取播放地址 / 外部API返回错误」—— 两边的 id 空间不通用，只能靠曲名匹配。
 

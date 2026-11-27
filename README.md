@@ -38,7 +38,7 @@
 | 24 | [7082音乐网](plugins/music7082/) | [www.7082.cn](https://www.7082.cn/) | `music7082` | 0.1.0 | 能，`POST /skin/xle_dj197/play.php` 返回 MP3 直链，实测 6MB、Range 206 |
 | 25 | [无忧音乐网](plugins/ting05/) | [ting05.com](https://ting05.com/) | `ting05` | 0.1.0 | 能，详情页 APlayer m4a；默认 ffmpeg 本地缓存，仓库探测远程地址 206 |
 | 26 | [番茄音乐](plugins/fanqie-music/) | [www.novelfm.com](https://www.novelfm.com/) | `fanqie-music` | 1.0.0 | 能，SSR 歌曲页取 m4a 直链（206），返回音频大小；网页版无搜索接口，搜索为首页 200 首本地匹配 |
-| 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.0 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中 |
+| 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.1 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中；返回音频总大小，进度条能显示时长 |
 | 28 | [24bit无损音乐](plugins/24bit/) | [www.24bit.net](https://www.24bit.net/) | `24bit` | 1.0.3 | 能，首页榜单实时解析并补全歌曲/歌手封面；榜单页可直接播放解析出的单曲，搜索同时列 16bit 44.1kHz 与 24bit 192kHz，单曲页取 FLAC 直链；24bit 96kHz 接口不稳定，未作主链路 |
 
 ### DJ音乐（2 个）
