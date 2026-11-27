@@ -2,11 +2,11 @@
 
 给 [MyGo Music](https://github.com/egoist/mygo-music)（葫芦音乐 / 千千静听同源内核）写的第三方音源插件，按 mygo 的插件规则写：纯 ESM、`plugin.json` 声明、`playback: "stream"`、只用 `fetch` 取数据。
 
-一共 54 个，每个站点一个目录。54 个都带 `locales/zh-CN.json`，其中 14 个另有 `en.json`（6 个真翻译、8 个占位），详见下文「locales 现状」。
+一共 56 个，每个站点一个目录。56 个都带 `locales/zh-CN.json`，其中 16 个另有 `en.json`（6 个真翻译、10 个占位），详见下文「locales 现状」。
 
-## 插件列表（54 个）
+## 插件列表（56 个）
 
-按类型分四组：音乐 28 个、DJ音乐 2 个、听书 21 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的九个为 2026-11-24/25 单独实测。
+按类型分四组：音乐 28 个、DJ音乐 4 个、听书 21 个、评书 3 个。组内保持加入的先后（和 git 提交顺序一致）。版本号取自各插件 `plugin.json`；原有 44 个的「能不能播」来自 2026-11-23 的全量探测（详见 [docs/探测基线-2026-11-23.md](docs/探测基线-2026-11-23.md)），后加入的九个为 2026-11-24/25 单独实测。
 
 ### 音乐（28 个）
 
@@ -41,12 +41,14 @@
 | 27 | [大米饭](plugins/damifan-music/) | [api.damifan.top](https://api.damifan.top/) | `damifan-music` | 0.1.1 | 能，APK 里的曲库在 `api.buguyy.cc`；站内 `geturl4` 恒空、`playurl` 全空（只挂夸克网盘），播放改走同源布谷按曲名匹配取酷我直链，随机 10 首 10/10 命中；返回音频总大小，进度条能显示时长 |
 | 28 | [24bit无损音乐](plugins/24bit/) | [www.24bit.net](https://www.24bit.net/) | `24bit` | 1.0.3 | 能，首页榜单实时解析并补全歌曲/歌手封面；榜单页可直接播放解析出的单曲，搜索同时列 16bit 44.1kHz 与 24bit 192kHz，单曲页取 FLAC 直链；24bit 96kHz 接口不稳定，未作主链路 |
 
-### DJ音乐（2 个）
+### DJ音乐（4 个）
 
 | # | 插件 | 站点 | 目录 | 版本 | 目前能不能播 |
 | --- | --- | --- | --- | --- | --- |
 | 1 | [DJ024电音](plugins/dj024-music/) | [www.dj024.com](https://www.dj024.com/) | `dj024-music` | 1.0.0 | 能，非独家是完整版，独家只给片段 |
 | 2 | [36DJ舞曲](plugins/36dj-music/) | [www.36dj.com](https://www.36dj.com/) | `36dj-music` | 1.0.0 | 能，m4a 直链带 vsid 令牌，可拖进度 |
+| 3 | [清风DJ音乐网](plugins/vvdj-music/) | [www.vvdj.com](https://www.vvdj.com/) | `vvdj-music` | 1.0.0 | 能，播放页 m4a 签名直链，Range 206；串烧/慢歌/华语/外语、榜单、歌单、制作人、搜索 |
+| 4 | [水晶DJ网](plugins/40dj-music/) | [www.40dj.com](https://www.40dj.com/) | `40dj-music` | 1.0.0 | 曲目页取 `"url"` 播放地址；云主机出口 503，国内网络可访问，分类走站内搜索 |
 
 ### 听书（21 个）
 
@@ -317,7 +319,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 ### locales 现状
 
-54 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 14 个带 `en.json`：
+56 个插件都有 `locales/zh-CN.json`（中文说法锁定，不受宿主语言影响）。其中 16 个带 `en.json`：
 
 - 6 个是真英文翻译：5nd音乐、布谷音乐、一起听歌吧、九天音乐、听听网、广场舞地盘；
 - 8 个是恒等映射（原文 → 原文）：36DJ舞曲、世纪音乐、汽车音乐网、DJ024电音、凤梨音乐、猫耳FM、听书网、优折美音乐——只做占位，挡住宿主自动机翻把术语翻乱，要真英文请逐条替换 `en.json` 的值。
@@ -384,14 +386,14 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 
 ## 聚合包（`allinone/`）
 
-把上面 54 个单站插件合成一个插件，形态照 [mygo-music-hulumusic-plugin](https://github.com/hhym/mygo-music-hulumusic-plugin)：一份 `plugin.json` + 一个 `index.js`，没有构建步骤。
+把上面 56 个单站插件合成一个插件，形态照 [mygo-music-hulumusic-plugin](https://github.com/hhym/mygo-music-hulumusic-plugin)：一份 `plugin.json` + 一个 `index.js`，没有构建步骤。
 
-- 目录：`allinone/`（`index.js` 约 1.3MB，54 个源各包一层 IIFE）
+- 目录：`allinone/`（`index.js` 约 1.3MB，56 个源各包一层 IIFE）
 - 插件 id：`allinone-music`，显示名「MyGo 聚合音源」，`playback: stream`
-- 侧栏五项：首页 / 音乐（28 源）/ DJ 音乐（2 源）/ 听书（21 源）/ 评书（3 源）/ 我喜欢
+- 侧栏五项：首页 / 音乐（28 源）/ DJ 音乐（4 源）/ 听书（21 源）/ 评书（3 源）/ 我喜欢
 - 编码：track 与页面的 id 一律 `<源 id>:<源内 id>`，聚合层拆前缀分发；每个源的 `host.storage`、`host.setting` 自动加 `__<源 id>.` 前缀，收藏与历史互不串味
 - 收藏 / 最近播放在聚合层统一存一份（`lib.liked` / `lib.recent` / `lib.tracks`），跨源可见
-- `permissions.network` 合并了 180 个域名（含分发图标用的 `cdn.jsdelivr.net`），`permissions.process` 合并了 ffmpeg 相关二进制，`settings` 共 25 项且 key 带源前缀（如 `85ting.transcode`）
+- `permissions.network` 合并了 190+ 个域名（含分发图标用的 `cdn.jsdelivr.net`），`permissions.process` 合并了 ffmpeg 相关二进制，`settings` 共 25 项且 key 带源前缀（如 `85ting.transcode`）
 - 源没返回 `size` 时，聚合层补一次 `range: bytes=0-1` 探测，进度条照样有总时长（HLS 跳过）
 - 源列表、分类入口统一挂葫芦图标（`assets/hulu-music-v3.png` 192×192，经 jsdelivr 分发）；源的 track / link / album / artist / playlist 没带 `imageUrl` 时，聚合层在 `wrapTrack`、`wrapLink` 里兜同一张图，曲目行也不再是空白音符；插件页卡片的 `icon.png` 用同一张
 
@@ -408,6 +410,14 @@ node scripts/probe-one.mjs allinone
 打包发版：
 
 ```bash
-cd allinone && zip -q -r ../dist/allinone-music-1.0.4.zip plugin.json index.js README.md icon.png locales && cd ..
-gh release create allinone-music-v1.0.4 -R hhym/mygo-music-plugins dist/allinone-music-1.0.4.zip --title "聚合音源 1.0.4：空白图标与曲目封面统一葫芦" --notes ...
+cd allinone && zip -q -r ../dist/allinone-music-1.0.5.zip plugin.json index.js README.md icon.png locales && cd ..
+gh release create allinone-music-v1.0.5 -R hhym/mygo-music-plugins dist/allinone-music-1.0.5.zip --title "聚合音源 1.0.5：加入清风DJ与水晶DJ" --notes ...
 ```
+
+### 清风DJ音乐网（vvdj-music）
+
+站点：https://www.vvdj.com。首页推荐 20 首，分类 `/sort/c1/` 到 `/sort/c4/`（串烧、慢歌连版、华语Remix、外语Remix），分页 `/sort/c1/<page>-0-0-0-1.html`；榜单 `/top/mixes`、`/top/club`、`/top/bar`、`/top/electro`；热门主题 `/hot/<slug>/`；歌单 `/radio/<id>.html` 每页 40 首；制作人 `/djshow/<id>.html`；搜索 `/so/<kw>.html`，20 条一页。播放页 `audio#vvdj-audio` 给 `media.vvdj.com` 的 m4a，带 `sign`、`t` 签名，必须现取现播；2026-11-27 实测 206、`audio/mp4`、可 Range。
+
+### 水晶DJ网（40dj-music）
+
+站点：https://www.40dj.com，CSCMS 4.0。`/sitemap.xml` 实际是 RSS 2.0，给最近 100 首的标题和 `/music/info-<id>`；搜索 `/music/search?key=<kw>&page=<n>`，20 条一页；曲目页 `/music/info-<id>` 元数据齐全（编号、类型、格式、音质、大小、发布时间），播放地址在播放器配置的 `"url"` 字段，旧模板回退 `<audio src>`；`/music/radio-<id>` 是 DJ 歌单。分类页由 CMS 动态生成，插件不写死路径，分类入口走站内搜索。下载页 `/music/down/load/<id>.html` 需登录，不绕过。开发云主机出口回 503，插件按真实错误提示，国内网络可访问。

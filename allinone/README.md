@@ -1,9 +1,9 @@
 # MyGo 聚合音源 · 一个插件装完所有源
 
-把 [mygo-music-plugins](https://github.com/hhym/mygo-music-plugins) 里的 54 个单站插件合成一个插件，结构照 `mygo-music-hulumusic-plugin`：一份 `plugin.json`、一个 `index.js`、没有构建。
+把 [mygo-music-plugins](https://github.com/hhym/mygo-music-plugins) 里的 56 个单站插件合成一个插件，结构照 `mygo-music-hulumusic-plugin`：一份 `plugin.json`、一个 `index.js`、没有构建。
 
 - 插件 id：`allinone-music`
-- 版本：1.0.4（`minAppVersion` 0.1.20）
+- 版本：1.0.0（`minAppVersion` 0.1.20）
 - 播放方式：`stream`
 
 ## 怎么用
@@ -12,7 +12,7 @@
 
 track / 页面的 id 统一编成 `<源 id>:<源内 id>`，聚合层拆前缀分发；每个源的 `host.storage`、`host.setting` 都加了前缀，收藏与历史互不串味。
 
-## 源清单（54 个）
+## 源清单（56 个）
 
 ### 音乐（28 个）
 
@@ -45,10 +45,12 @@ track / 页面的 id 统一编成 `<源 id>:<源内 id>`，聚合层拆前缀分
 - **大米饭** `damifan-music` — 大米饭的推荐、随机、标签、歌单与搜索，曲库上万首，320kbps mp3 直接播放。
 - **24bit无损音乐** `24bit` — 
 
-### DJ音乐（2 个）
+### DJ音乐（4 个）
 
 - **DJ024电音** `dj024-music` — 沈阳DJ024电音传媒（www.dj024.com）的DJ舞曲、串烧与现场，带独家试听。
 - **36DJ舞曲** `36dj-music` — 36DJ舞曲网（www.36dj.com）的DJ舞曲、串烧与车载大碟，含中文、英文、慢摇分类与人气榜。
+- **清风DJ音乐网** `vvdj-music` — 清风DJ音乐网（www.vvdj.com）的DJ舞曲、串烧、慢歌连版、华语/外语Remix，带歌单、榜单和制作人主页，m4a 可拖动播放。
+- **水晶DJ网** `40dj-music` — 水晶DJ网（www.40dj.com）的抖音DJ、中文/Electro/House 舞曲与 DJ 歌单，带最新上传、分类、搜索和在线播放。
 
 ### 听书（21 个）
 

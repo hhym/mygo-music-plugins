@@ -1,0 +1,28 @@
+{
+  "id": "40dj-music",
+  "name": "水晶DJ网",
+  "description": "水晶DJ网（www.40dj.com）的抖音DJ、中文/Electro/House 舞曲与 DJ 歌单，带最新上传、分类、搜索和在线播放。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": [
+      "www.40dj.com",
+      "40dj.com",
+      "m.40dj.com",
+      "img.40dj.com",
+      "media.40dj.com",
+      "file.40dj.com",
+      "static.40dj.com"
+    ]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "最新上传", "page": "latest/1" },
+    { "title": "串烧舞曲", "page": "category/串烧舞曲" },
+    { "title": "中文舞曲", "page": "category/中文舞曲" },
+    { "title": "DJ歌单", "page": "radio" },
+    { "builtin": "liked" }
+  ]
+}

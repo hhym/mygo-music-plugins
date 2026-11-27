@@ -1,0 +1,20 @@
+{
+  "id": "vvdj-music",
+  "name": "清风DJ音乐网",
+  "description": "清风DJ音乐网（www.vvdj.com）的DJ舞曲、串烧、慢歌连版、华语/外语Remix，带歌单、榜单和制作人主页，m4a 可拖动播放。",
+  "version": "1.0.0",
+  "minAppVersion": "0.1.20",
+  "main": "index.js",
+  "playback": "stream",
+  "permissions": {
+    "network": ["www.vvdj.com", "img.vvdj.com", "media.vvdj.com", "jsin.vvdj.com"]
+  },
+  "navigation": [
+    { "builtin": "home" },
+    { "title": "串烧舞曲", "page": "sort/c1" },
+    { "title": "慢歌连版", "page": "sort/c2" },
+    { "title": "热门榜单", "page": "top/mixes" },
+    { "title": "DJ歌单", "page": "radio" },
+    { "builtin": "liked" }
+  ]
+}
