@@ -1,7 +1,7 @@
 {
   "id": "allinone-music",
   "name": "MyGo 聚合音源",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",

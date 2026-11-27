@@ -3,7 +3,7 @@
 把 [mygo-music-plugins](https://github.com/hhym/mygo-music-plugins) 里的 54 个单站插件合成一个插件，结构照 `mygo-music-hulumusic-plugin`：一份 `plugin.json`、一个 `index.js`、没有构建。
 
 - 插件 id：`allinone-music`
-- 版本：1.0.1（`minAppVersion` 0.1.20）
+- 版本：1.0.2（`minAppVersion` 0.1.20）
 - 播放方式：`stream`
 
 ## 怎么用
