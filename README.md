@@ -381,3 +381,32 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 ### 我听评书网（qmtsw）
 
 站点：https://www.qmtsw.com。首页最新推荐，分类 `/book/<N>.html`，专辑 `/show/<id>.html`，章节 `/play/<id>-...html`；播放页的 `var now = FonHen_JieMa("...")` 解码后得到音频，个别页直接是明文 `var now = "https://...m4a"`。站点音频多为喜马拉雅 HE-AAC，默认 ffmpeg 转 AAC-LC（含 `/snap/bin/ffmpeg`）。2026-11-23 实测可解析 217 集专辑的完整章节列表；2026-11-24 云主机复核时源站首页和详情都回 `520`，插件按 4 次退避重试。
+
+## 聚合包（`allinone/`）
+
+把上面 54 个单站插件合成一个插件，形态照 [mygo-music-hulumusic-plugin](https://github.com/hhym/mygo-music-hulumusic-plugin)：一份 `plugin.json` + 一个 `index.js`，没有构建步骤。
+
+- 目录：`allinone/`（`index.js` 约 1.3MB，54 个源各包一层 IIFE）
+- 插件 id：`allinone-music`，显示名「MyGo 聚合音源」，`playback: stream`
+- 侧栏五项：首页 / 音乐（28 源）/ DJ 音乐（2 源）/ 听书（21 源）/ 评书（3 源）/ 我喜欢
+- 编码：track 与页面的 id 一律 `<源 id>:<源内 id>`，聚合层拆前缀分发；每个源的 `host.storage`、`host.setting` 自动加 `__<源 id>.` 前缀，收藏与历史互不串味
+- 收藏 / 最近播放在聚合层统一存一份（`lib.liked` / `lib.recent` / `lib.tracks`），跨源可见
+- `permissions.network` 合并了 179 个域名，`permissions.process` 合并了 ffmpeg 相关二进制，`settings` 共 25 项且 key 带源前缀（如 `85ting.transcode`）
+- 源没返回 `size` 时，聚合层补一次 `range: bytes=0-1` 探测，进度条照样有总时长（HLS 跳过）
+
+源有增删改后重新生成：
+
+```bash
+node tools/build-allinone.mjs          # 输出到 allinone/
+node --check allinone/index.js
+node scripts/probe-one.mjs allinone
+```
+
+构建器在 `tools/build-allinone.mjs`，聚合层路由（前缀编码、页面包装、并发池、本地库）在 `tools/allinone-router.js`。分类从本 README 的四张分组表里读，不需要另外维护清单。
+
+打包发版：
+
+```bash
+cd allinone && zip -q -r ../dist/allinone-music-1.0.0.zip plugin.json index.js README.md locales && cd ..
+gh release create allinone-music-v1.0.0 dist/allinone-music-1.0.0.zip --title "聚合音源 1.0.0：54 个源一个插件" --notes-file ...
+```
