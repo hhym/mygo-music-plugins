@@ -393,6 +393,7 @@ release/          打包好的 zip，<id>-<版本>.zip（ASCII，发 Releases �
 - 收藏 / 最近播放在聚合层统一存一份（`lib.liked` / `lib.recent` / `lib.tracks`），跨源可见
 - `permissions.network` 合并了 179 个域名，`permissions.process` 合并了 ffmpeg 相关二进制，`settings` 共 25 项且 key 带源前缀（如 `85ting.transcode`）
 - 源没返回 `size` 时，聚合层补一次 `range: bytes=0-1` 探测，进度条照样有总时长（HLS 跳过）
+- 源列表与分类入口统一挂葫芦图标（`assets/hulu.png` 128×128，经 jsdelivr 分发），源自己没 logo 时不再是一片空白
 
 源有增删改后重新生成：
 

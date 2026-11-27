@@ -1,7 +1,7 @@
 {
   "id": "allinone-music",
   "name": "MyGo 聚合音源",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minAppVersion": "0.1.20",
   "main": "index.js",
   "playback": "stream",
@@ -84,6 +84,7 @@
       "car-lw.kuwo.cn",
       "car-sh.kuwo.cn",
       "car-ty.kuwo.cn",
+      "cdn.jsdelivr.net",
       "cdn.m3u8.liyuncss.guoguo.org.cn",
       "cloud.guoguo.org.cn",
       "cn.tingfm.com",

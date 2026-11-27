@@ -206,12 +206,13 @@ function buildIndex(sources) {
 /* 生成 plugin.json                                                   */
 /* ------------------------------------------------------------------ */
 
-function buildManifest(sources) {
+function buildManifest(sources, meta) {
   const network = new Set();
   const processes = new Set();
   const settings = [];
   const seen = new Set();
 
+  network.add("cdn.jsdelivr.net");
   for (const src of sources) {
     const perms = src.json.permissions || {};
     for (const host of perms.network || []) network.add(host);
@@ -231,9 +232,9 @@ function buildManifest(sources) {
   }
 
   const manifest = {
-    id: "allinone-music",
-    name: "MyGo 聚合音源",
-    version: "1.0.0",
+    id: meta.id,
+    name: meta.name,
+    version: meta.version,
     minAppVersion: "0.1.20",
     main: "index.js",
     playback: "stream",
@@ -270,7 +271,7 @@ function buildManifest(sources) {
 
 function buildLocales(sources) {
   const out = {};
-  out["MyGo 聚合音源"] = "MyGo 聚合音源";
+  out[META.name] = META.name;
   const base = {
     音乐: "音乐",
     "DJ 音乐": "DJ 音乐",
@@ -344,7 +345,12 @@ const sources = loadSources();
 if (!sources.length) throw new Error("没有可用的源");
 
 const index = buildIndex(sources);
-const manifest = buildManifest(sources);
+const META = {
+  id: opt("id", "allinone-music"),
+  name: opt("name", "MyGo 聚合音源"),
+  version: opt("version", "1.0.0"),
+};
+const manifest = buildManifest(sources, META);
 const locales = buildLocales(sources);
 const readme = buildReadme(sources, manifest);
 
